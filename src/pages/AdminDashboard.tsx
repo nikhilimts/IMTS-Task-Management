@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaPlus, FaEye } from 'react-icons/fa';
+import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaPlus, FaEye, FaUsers } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import authService from '../services/authService';
 import taskService from '../services/taskService';
 import type { Task as TaskType, TaskFilters, DashboardStatsResponse } from '../services/taskService';
 import ProgressCard from '../components/ProgressCard';
+import GroupTaskView from '../components/GroupTaskView';
 
 // ✅ Real task interfaces and data
 interface TaskStats {
@@ -27,6 +28,8 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [expandedTask, setExpandedTask] = useState<string | null>(null);
   
   // Task management state
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -70,7 +73,17 @@ const AdminDashboard: React.FC = () => {
     loadTasks();
     loadTaskStats();
     loadDashboardStats();
+    loadCurrentUser();
   }, [filters]);
+
+  const loadCurrentUser = async () => {
+    try {
+      const userData = authService.getCurrentUser();
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error('Failed to load current user:', error);
+    }
+  };
 
   const loadTasks = async () => {
     try {
@@ -127,6 +140,26 @@ const AdminDashboard: React.FC = () => {
       ...prev,
       page,
     }));
+  };
+
+  const handleTaskUpdate = (updatedTask: TaskType) => {
+    setTasks(prev => prev.map(task => 
+      task._id === updatedTask._id ? updatedTask : task
+    ));
+  };
+
+  const toggleTaskExpansion = (taskId: string) => {
+    setExpandedTask(prev => prev === taskId ? null : taskId);
+  };
+
+  const getGroupTaskProgress = (task: TaskType) => {
+    if (!task.isGroupTask || !task.assignedTo.length) return 0;
+    
+    const completedCount = task.assignedTo.filter(
+      assignment => assignment.individualStage === 'done' || assignment.status === 'completed'
+    ).length;
+    
+    return Math.round((completedCount / task.assignedTo.length) * 100);
   };
 
 
@@ -441,6 +474,7 @@ const AdminDashboard: React.FC = () => {
             <table className="min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b">
+                  <th className="py-2 px-4 whitespace-nowrap">Type</th>
                   <th className="py-2 px-4 whitespace-nowrap">Creator</th>
                   <th className="py-2 px-4 whitespace-nowrap">Task Title</th>
                   <th className="py-2 px-4 whitespace-nowrap">Assigned To</th>
@@ -451,70 +485,129 @@ const AdminDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {tasks.map((task) => (
-                  <tr key={task._id} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4">
-                      <div>
-                        <div className="font-medium">{task.createdBy.name}</div>
-                      </div>
-                    </td>
-                    <td className="py-2 px-4">
-                      <div>
-                        <div className="font-medium">{task.title}</div>
-                        <div className="text-xs text-gray-500 truncate max-w-xs">
-                          {task.description}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-2 px-4">
-                      {task.assignedTo.length > 0 ? (
-                        <div>
-                          {task.assignedTo.slice(0, 2).map((assignment, idx) => (
-                            <div key={idx} className="text-xs">
-                              {assignment.user.name}
+                {tasks.map((task) => {
+                  const isExpanded = expandedTask === task._id;
+                  const progress = getGroupTaskProgress(task);
+                  
+                  return (
+                    <React.Fragment key={task._id}>
+                      <tr className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-4">
+                          {task.isGroupTask ? (
+                            <div className="flex items-center space-x-1">
+                              <FaUsers className="text-blue-600 w-4 h-4" />
+                              <span className="text-xs text-blue-600 font-medium">Group</span>
+                              {task.isGroupTask && (
+                                <span className="text-xs text-gray-500">
+                                  {progress}%
+                                </span>
+                              )}
                             </div>
-                          ))}
-                          {task.assignedTo.length > 2 && (
-                            <div className="text-xs text-gray-500">
-                              +{task.assignedTo.length - 2} more
-                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-600">Individual</span>
                           )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">Unassigned</span>
+                        </td>
+                        <td className="py-2 px-4">
+                          <div>
+                            <div className="font-medium">{task.createdBy.name}</div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-4">
+                          <div>
+                            <div className="font-medium">{task.title}</div>
+                            <div className="text-xs text-gray-500 truncate max-w-xs">
+                              {task.description}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-4">
+                          {task.assignedTo.length > 0 ? (
+                            <div>
+                              {task.isGroupTask ? (
+                                <div>
+                                  <div className="text-xs font-medium text-blue-600">
+                                    {task.assignedTo.length} members
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {task.assignedTo.filter(a => a.individualStage === 'done').length} completed
+                                  </div>
+                                </div>
+                              ) : (
+                                <div>
+                                  {task.assignedTo.slice(0, 2).map((assignment, idx) => (
+                                    <div key={idx} className="text-xs">
+                                      {assignment.user.name}
+                                    </div>
+                                  ))}
+                                  {task.assignedTo.length > 2 && (
+                                    <div className="text-xs text-gray-500">
+                                      +{task.assignedTo.length - 2} more
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-xs">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-2 px-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
+                            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                          </span>
+                        </td>
+                        <td className="py-2 px-4">
+                          <span className={`px-2 py-1 rounded-full text-xs ${getStageColor(task.stage)}`}>
+                            {task.stage.charAt(0).toUpperCase() + task.stage.slice(1)}
+                          </span>
+                        </td>
+                        <td className="py-2 px-4">
+                          <div className="text-xs">
+                            <div>{new Date(task.deadline).toLocaleDateString()}</div>
+                            <div className={`${isOverdue(task.deadline, task.status) ? 'text-red-500' : 'text-gray-500'}`}>
+                              {formatDate(task.deadline)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-4">
+                          <div className="flex space-x-1">
+                            {task.isGroupTask && (
+                              <button 
+                                className="text-blue-500 hover:text-blue-700 p-1"
+                                title={isExpanded ? "Collapse Group View" : "Expand Group View"}
+                                onClick={() => toggleTaskExpansion(task._id)}
+                              >
+                                <FaUsers />
+                              </button>
+                            )}
+                            <button 
+                              className="text-blue-500 hover:text-blue-700 p-1"
+                              title="View Details"
+                              onClick={() => navigate(`/tasks/${task._id}`)}
+                            >
+                              <FaEye />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      
+                      {/* Expanded Group Task View */}
+                      {isExpanded && task.isGroupTask && currentUser && (
+                        <tr>
+                          <td colSpan={8} className="p-0 bg-gray-50">
+                            <div className="p-4">
+                              <GroupTaskView 
+                                task={task}
+                                currentUserId={currentUser._id}
+                                onTaskUpdate={handleTaskUpdate}
+                              />
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                    <td className="py-2 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </span>
-                    </td>
-                    <td className="py-2 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getStageColor(task.stage)}`}>
-                        {task.stage.charAt(0).toUpperCase() + task.stage.slice(1)}
-                      </span>
-                    </td>
-                    <td className="py-2 px-4">
-                      <div className="text-xs">
-                        <div>{new Date(task.deadline).toLocaleDateString()}</div>
-                        <div className={`${isOverdue(task.deadline, task.status) ? 'text-red-500' : 'text-gray-500'}`}>
-                          {formatDate(task.deadline)}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-2 px-4">
-                      <div className="flex space-x-1">
-                        <button 
-                          className="text-blue-500 hover:text-blue-700 p-1"
-                          title="View Details"
-                          onClick={() => navigate(`/tasks/${task._id}`)}
-                        >
-                          <FaEye />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
           )}
