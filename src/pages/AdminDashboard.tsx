@@ -195,7 +195,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleCreateTask = () => {
-    navigate('/create-task');
+    navigate('/tasks/new');
   };
 
   // Close dropdown when clicking outside
