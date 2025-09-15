@@ -8,6 +8,7 @@ export interface Task {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred';
   stage: 'planning' | 'development' | 'testing' | 'review' | 'deployment' | 'completed';
+  isGroupTask: boolean;
   createdBy: {
     _id: string;
     name: string;
@@ -23,6 +24,9 @@ export interface Task {
     };
     assignedAt: string;
     status: string;
+    individualStage: 'planning' | 'pending' | 'done';
+    completedAt?: string;
+    notes?: string;
   }>;
   department: {
     _id: string;
@@ -90,6 +94,7 @@ export interface CreateTaskData {
   assignedTo?: string[];
   tags?: string[];
   attachments?: File[];
+  isGroupTask?: boolean;
 }
 
 export interface UpdateTaskData {
@@ -196,6 +201,12 @@ export interface UpdateStageData {
   reason?: string;
 }
 
+export interface UpdateIndividualStageData {
+  stage?: 'planning' | 'pending' | 'done';
+  status?: 'assigned' | 'in_progress' | 'completed' | 'blocked';
+  notes?: string;
+}
+
 class TaskService {
   /**
    * Create a new task
@@ -218,6 +229,10 @@ class TaskService {
         formData.append('tags', JSON.stringify(taskData.tags));
       }
       
+      if (taskData.isGroupTask !== undefined) {
+        formData.append('isGroupTask', JSON.stringify(taskData.isGroupTask));
+      }
+      
       taskData.attachments.forEach(file => {
         formData.append('attachments', file);
       });
@@ -236,7 +251,8 @@ class TaskService {
         deadline: taskData.deadline,
         priority: taskData.priority,
         assignedTo: taskData.assignedTo || [],
-        tags: taskData.tags || []
+        tags: taskData.tags || [],
+        isGroupTask: taskData.isGroupTask !== undefined ? taskData.isGroupTask : false
       });
       return response.data;
     }
@@ -317,6 +333,14 @@ class TaskService {
    */
   async updateTaskStage(id: string, stageData: UpdateStageData): Promise<TaskResponse> {
     const response = await api.put(`/tasks/${id}/stage`, stageData);
+    return response.data;
+  }
+
+  /**
+   * Update individual stage for group task member
+   */
+  async updateIndividualStage(id: string, stageData: UpdateIndividualStageData): Promise<TaskResponse> {
+    const response = await api.put(`/tasks/${id}/individual-stage`, stageData);
     return response.data;
   }
 
