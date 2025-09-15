@@ -6,7 +6,7 @@ import authService from './services/authService';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
-import CreateTask from './pages/CreateTask';
+import TaskDetail from './pages/TaskDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
@@ -72,10 +72,18 @@ function App() {
           }
         />
         <Route
-          path="/create-task"
+          path="/tasks/new"
           element={
             <ProtectedRoute>
-              <CreateTask />
+              <TaskDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tasks/:id"
+          element={
+            <ProtectedRoute>
+              <TaskDetail />
             </ProtectedRoute>
           }
         />
