@@ -214,45 +214,9 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen font-sans bg-gray-100">
-      {/* Sidebar */}
-      <aside className={`fixed md:static top-0 left-0 z-20 bg-white w-60 h-full shadow-md transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="p-6 text-2xl font-bold border-b">IMTS</div>
-        <nav className="space-y-2 px-4 mt-4">
-          <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-200 cursor-pointer">
-            <span>📊</span> <span>Dashboard</span>
-          </div>
-          <div className="flex items-center space-x-2 p-2 rounded-md bg-purple-100 font-semibold text-purple-600">
-            <span>✅</span> <span>Task</span>
-          </div>
-          <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-200 cursor-pointer">
-            <span>📄</span> <span>Report</span>
-          </div>
-          <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-200 cursor-pointer">
-            <span>⚙️</span> <span>Setting</span>
-          </div>
-        </nav>
-        <div className="p-4 mt-auto border-t absolute bottom-0 w-full">
-          <div className="flex items-center space-x-3 mb-3">
-            <img src="/avatar.png" alt="Admin" className="w-10 h-10 rounded-full object-cover" />
-            <div>
-              <div className="font-bold">Admin</div>
-              <div className="text-sm text-gray-500">admin@gmail.com</div>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-2 p-2 rounded-md hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"
-          >
-            <FaSignOutAlt />
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+     
 
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black opacity-40 z-10 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
+     
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
