@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { 
   FaArrowLeft, FaSave, FaEdit, FaTrash, FaPlus, FaDownload, 
   FaUsers, FaClock, FaTimes,
-  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding
+  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import authService from '../services/authService';
@@ -292,6 +292,16 @@ const TaskDetail: React.FC = () => {
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to remove attachment');
     }
+  };
+
+  const handleViewPDF = (taskId: string, attachmentId: string) => {
+    // Use browser's native PDF viewer with public view endpoint (no authentication required)
+    const pdfUrl = `${api.defaults.baseURL}/tasks/${taskId}/attachments/${attachmentId}/view`;
+    window.open(pdfUrl, '_blank');
+  };
+
+  const isPDF = (fileName: string) => {
+    return fileName.toLowerCase().endsWith('.pdf');
   };
 
   const handleDeleteTask = async () => {
@@ -650,6 +660,15 @@ const TaskDetail: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
+                        {isPDF(attachment.originalName) && (
+                          <button
+                            onClick={() => handleViewPDF(task._id, attachment._id)}
+                            className="text-green-600 hover:text-green-800"
+                            title="View PDF"
+                          >
+                            <FaEye />
+                          </button>
+                        )}
                         <button
                           onClick={() => taskService.downloadAttachment(task._id, attachment._id)}
                           className="text-blue-600 hover:text-blue-800"
@@ -867,6 +886,7 @@ const TaskDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };
