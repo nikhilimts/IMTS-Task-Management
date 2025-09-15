@@ -251,8 +251,16 @@ class TaskService {
    * Get single task by ID
    */
   async getTask(id: string): Promise<TaskResponse> {
-    const response = await api.get(`/tasks/${id}`);
-    return response.data;
+    console.log('TaskService: Making API call to /tasks/' + id);
+    try {
+      const response = await api.get(`/tasks/${id}`);
+      console.log('TaskService: API response received:', response);
+      console.log('TaskService: Response data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('TaskService: API call failed:', error);
+      throw error;
+    }
   }
 
   /**
