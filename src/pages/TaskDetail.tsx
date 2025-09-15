@@ -40,6 +40,12 @@ const TaskDetail: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const currentUser = authService.getCurrentUser();
 
+  // Permission checks based on user role
+  const isCreator = task?.createdBy?._id === currentUser?._id;
+  const isAssignee = task?.assignedTo?.some(assignment => assignment.user._id === currentUser?._id);
+  const canUpdateStatus = isCreator;
+  const canUpdateStage = isAssignee;
+
   // Form data
   const [formData, setFormData] = useState<CreateTaskData>({
     title: '',
@@ -398,6 +404,26 @@ const TaskDetail: React.FC = () => {
               <h1 className="text-xl font-semibold text-gray-900">
                 {isCreateMode ? 'Create New Task' : task?.title || 'Task Details'}
               </h1>
+              {/* Permission Indicator */}
+              {!isCreateMode && task && (
+                <div className="flex items-center space-x-2">
+                  {isCreator && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Creator - Can update status
+                    </span>
+                  )}
+                  {isAssignee && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Assignee - Can update stage
+                    </span>
+                  )}
+                  {!isCreator && !isAssignee && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      Viewer - Read only
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="flex items-center space-x-3">
@@ -423,20 +449,29 @@ const TaskDetail: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => setEditMode(true)}
-                        className="px-4 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50"
-                      >
-                        <FaEdit className="mr-2" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={handleDeleteTask}
-                        className="px-4 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
-                      >
-                        <FaTrash className="mr-2" />
-                        Delete
-                      </button>
+                      {isCreator && (
+                        <>
+                          <button
+                            onClick={() => setEditMode(true)}
+                            className="px-4 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50"
+                          >
+                            <FaEdit className="mr-2" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={handleDeleteTask}
+                            className="px-4 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                          >
+                            <FaTrash className="mr-2" />
+                            Delete
+                          </button>
+                        </>
+                      )}
+                      {!isCreator && (
+                        <div className="text-sm text-gray-500">
+                          Only the task creator can edit task details
+                        </div>
+                      )}
                     </>
                   )}
                 </>
@@ -583,32 +618,50 @@ const TaskDetail: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Status
+                      {!canUpdateStatus && (
+                        <span className="text-xs text-gray-500 ml-2">(Creator only)</span>
+                      )}
                     </label>
-                    <select
-                      value={task.status}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(task.status)}`}
-                    >
-                      <option value="created">Created</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="transferred">Transferred</option>
-                    </select>
+                    {canUpdateStatus ? (
+                      <select
+                        value={task.status}
+                        onChange={(e) => handleStatusChange(e.target.value)}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(task.status)}`}
+                      >
+                        <option value="created">Created</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="transferred">Transferred</option>
+                      </select>
+                    ) : (
+                      <div className={`w-full px-3 py-2 border border-gray-200 rounded-md ${getStatusColor(task.status)} opacity-75 cursor-not-allowed`}>
+                        {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Stage
+                      {!canUpdateStage && (
+                        <span className="text-xs text-gray-500 ml-2">(Assignee only)</span>
+                      )}
                     </label>
-                    <select
-                      value={task.stage}
-                      onChange={(e) => handleStageChange(e.target.value)}
-                      className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStageColor(task.stage)}`}
-                    >
-                      <option value="planning">Planning</option>
-                      <option value="pending">Pending</option>
-                      <option value="done">Done</option>
-                    </select>
+                    {canUpdateStage ? (
+                      <select
+                        value={task.stage}
+                        onChange={(e) => handleStageChange(e.target.value)}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStageColor(task.stage)}`}
+                      >
+                        <option value="planning">Planning</option>
+                        <option value="pending">Pending</option>
+                        <option value="done">Done</option>
+                      </select>
+                    ) : (
+                      <div className={`w-full px-3 py-2 border border-gray-200 rounded-md ${getStageColor(task.stage)} opacity-75 cursor-not-allowed`}>
+                        {task.stage.charAt(0).toUpperCase() + task.stage.slice(1)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
