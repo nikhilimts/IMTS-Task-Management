@@ -752,55 +752,75 @@ const TaskDetail: React.FC = () => {
                 </div>
 
                 {/* Existing Remarks */}
-                <div className="space-y-4">
-                  {/* Creator Remarks */}
-                  {task.remarks?.creator && task.remarks.creator.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">Creator Remarks</h3>
-                      {task.remarks.creator.map((remark, index) => (
-                        <div key={index} className="p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-md">
-                          <p className="text-sm text-gray-800">{remark.text}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {remark.author?.name} on {new Date(remark.createdAt).toLocaleString()}
-                          </p>
+                <div className="space-y-3">
+                  {(() => {
+                    // Combine all remarks from different categories into one array
+                    const allRemarks = [];
+                    
+                    if (task.remarks?.creator) {
+                      allRemarks.push(...task.remarks.creator.map(remark => ({ ...remark, category: 'creator' })));
+                    }
+                    if (task.remarks?.assignee) {
+                      allRemarks.push(...task.remarks.assignee.map(remark => ({ ...remark, category: 'assignee' })));
+                    }
+                    if (task.remarks?.general) {
+                      allRemarks.push(...task.remarks.general.map(remark => ({ ...remark, category: 'general' })));
+                    }
+                    
+                    // Sort by creation date (latest first)
+                    allRemarks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                    
+                    if (allRemarks.length === 0) {
+                      return <p className="text-gray-500 text-sm">No remarks yet</p>;
+                    }
+                    
+                    return allRemarks.map((remark, index) => {
+                      // Get styling based on category
+                      const getCategoryStyle = (category: string) => {
+                        switch (category) {
+                          case 'creator':
+                            return 'bg-blue-50 border-l-4 border-blue-400';
+                          case 'assignee':
+                            return 'bg-green-50 border-l-4 border-green-400';
+                          case 'general':
+                            return 'bg-gray-50 border-l-4 border-gray-400';
+                          default:
+                            return 'bg-gray-50 border-l-4 border-gray-400';
+                        }
+                      };
+                      
+                      const getCategoryLabel = (category: string) => {
+                        switch (category) {
+                          case 'creator':
+                            return 'Creator';
+                          case 'assignee':
+                            return 'Assignee';
+                          case 'general':
+                            return 'General';
+                          default:
+                            return 'General';
+                        }
+                      };
+                      
+                      return (
+                        <div key={`${remark.category}-${index}`} className={`p-3 rounded-r-md ${getCategoryStyle(remark.category)}`}>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-800">{remark.text}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <p className="text-xs text-gray-500">
+                                  By {remark.author?.name} • {new Date(remark.createdAt).toLocaleString()}
+                                </p>
+                                <span className="text-xs px-2 py-1 bg-white bg-opacity-50 rounded-full">
+                                  {getCategoryLabel(remark.category)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Assignee Remarks */}
-                  {task.remarks?.assignee && task.remarks.assignee.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">Assignee Remarks</h3>
-                      {task.remarks.assignee.map((remark, index) => (
-                        <div key={index} className="p-3 bg-green-50 border-l-4 border-green-400 rounded-r-md">
-                          <p className="text-sm text-gray-800">{remark.text}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {remark.author?.name} on {new Date(remark.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* General Remarks */}
-                  {task.remarks?.general && task.remarks.general.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700 mb-2">General Remarks</h3>
-                      {task.remarks.general.map((remark, index) => (
-                        <div key={index} className="p-3 bg-gray-50 border-l-4 border-gray-400 rounded-r-md">
-                          <p className="text-sm text-gray-800">{remark.text}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {remark.author?.name} on {new Date(remark.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {(!task.remarks?.creator?.length && !task.remarks?.assignee?.length && !task.remarks?.general?.length) && (
-                    <p className="text-gray-500 text-sm">No remarks yet</p>
-                  )}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             )}
