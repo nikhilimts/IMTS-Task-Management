@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import authService, { type LoginData } from '../services/authService';
 
 interface LoginFormData {
@@ -143,7 +142,6 @@ const Login: React.FC = () => {
           </p>
         </div>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 };
