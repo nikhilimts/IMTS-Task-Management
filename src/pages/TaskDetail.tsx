@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import authService from '../services/authService';
+import api from '../services/api';
 import type { Task, CreateTaskData, UpdateTaskData, RemarkData } from '../services/taskService';
 
 interface User {
@@ -26,6 +27,8 @@ const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isCreateMode = id === 'new';
+  
+  console.log('TaskDetail component loaded. ID:', id, 'isCreateMode:', isCreateMode);
   
   // States
   const [task, setTask] = useState<Task | null>(null);
@@ -56,40 +59,46 @@ const TaskDetail: React.FC = () => {
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  useEffect(() => {
-    loadInitialData();
-  }, [id]);
-
   const loadInitialData = async () => {
     try {
       // Load users and departments
       const [usersResponse, departmentsResponse] = await Promise.all([
-        fetch('/api/users', {
-          headers: { Authorization: `Bearer ${authService.getToken()}` }
-        }),
+        api.get('/users'),
         authService.getDepartments()
       ]);
 
-      if (usersResponse.ok) {
-        const usersData = await usersResponse.json();
-        setUsers(usersData.data || []);
+      if (usersResponse.data && usersResponse.data.success) {
+        setUsers(usersResponse.data.data || []);
       }
       setDepartments(departmentsResponse);
 
       // Load task if not in create mode
       if (!isCreateMode && id) {
-        const taskResponse = await taskService.getTask(id);
-        if (taskResponse.success) {
-          setTask(taskResponse.data.task);
-          setFormData({
-            title: taskResponse.data.task.title,
-            description: taskResponse.data.task.description,
-            deadline: new Date(taskResponse.data.task.deadline).toISOString().slice(0, 16),
-            priority: taskResponse.data.task.priority,
-            assignedTo: taskResponse.data.task.assignedTo.map(a => a.user._id),
-            tags: taskResponse.data.task.tags || [],
-            attachments: []
-          });
+        console.log('Attempting to load task with ID:', id);
+        try {
+          const taskResponse = await taskService.getTask(id);
+          console.log('Raw task response:', taskResponse);
+          
+          if (taskResponse && taskResponse.success && taskResponse.data && taskResponse.data.task) {
+            console.log('Setting task data:', taskResponse.data.task);
+            setTask(taskResponse.data.task);
+            setFormData({
+              title: taskResponse.data.task.title,
+              description: taskResponse.data.task.description,
+              deadline: new Date(taskResponse.data.task.deadline).toISOString().slice(0, 16),
+              priority: taskResponse.data.task.priority,
+              assignedTo: taskResponse.data.task.assignedTo.map(a => a.user._id),
+              tags: taskResponse.data.task.tags || [],
+              attachments: []
+            });
+            console.log('Task set successfully');
+          } else {
+            console.error('Invalid task response structure:', taskResponse);
+            toast.error('Invalid response from server');
+          }
+        } catch (taskError) {
+          console.error('Error fetching task:', taskError);
+          toast.error('Failed to load task details');
         }
       }
     } catch (error) {
@@ -99,6 +108,10 @@ const TaskDetail: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadInitialData();
+  }, [id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -340,6 +353,11 @@ const TaskDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Debug Info */}
+      <div className="fixed top-0 left-0 bg-black text-white p-2 text-xs z-50">
+        Debug: loading={loading.toString()}, isCreateMode={isCreateMode.toString()}, taskExists={!!task}, taskId={id}
+      </div>
+      
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
