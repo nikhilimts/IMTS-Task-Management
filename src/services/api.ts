@@ -33,8 +33,15 @@ api.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      // Redirect to login if needed
-      window.location.href = '/login';
+      localStorage.removeItem('refreshToken');
+      
+      // Only redirect if we're not already on a public route
+      const currentPath = window.location.pathname;
+      const publicRoutes = ['/login', '/signup'];
+      
+      if (!publicRoutes.includes(currentPath)) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
