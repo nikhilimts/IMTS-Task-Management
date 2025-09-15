@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import { 
   FaArrowLeft, FaSave, FaEdit, FaTrash, FaPlus, FaDownload, 
   FaUsers, FaClock, FaTimes,
-  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye
+  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye,
+  FaFilePdf, FaImage, FaFile
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import authService from '../services/authService';
@@ -294,14 +295,33 @@ const TaskDetail: React.FC = () => {
     }
   };
 
-  const handleViewPDF = (taskId: string, attachmentId: string) => {
-    // Use browser's native PDF viewer with public view endpoint (no authentication required)
-    const pdfUrl = `${api.defaults.baseURL}/tasks/${taskId}/attachments/${attachmentId}/view`;
-    window.open(pdfUrl, '_blank');
+  const handleViewFile = (taskId: string, attachmentId: string) => {
+    // Use browser's native viewer for PDFs and images with public view endpoint
+    const fileUrl = `${api.defaults.baseURL}/tasks/${taskId}/attachments/${attachmentId}/view`;
+    window.open(fileUrl, '_blank');
   };
 
   const isPDF = (fileName: string) => {
     return fileName.toLowerCase().endsWith('.pdf');
+  };
+
+  const isImage = (fileName: string) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'];
+    return imageExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+  };
+
+  const isViewable = (fileName: string) => {
+    return isPDF(fileName) || isImage(fileName);
+  };
+
+  const getFileIcon = (fileName: string) => {
+    if (isPDF(fileName)) {
+      return <FaFilePdf className="text-red-500" />;
+    } else if (isImage(fileName)) {
+      return <FaImage className="text-blue-500" />;
+    } else {
+      return <FaFile className="text-gray-500" />;
+    }
   };
 
   const handleDeleteTask = async () => {
@@ -651,7 +671,7 @@ const TaskDetail: React.FC = () => {
                   {task.attachments.map((attachment) => (
                     <div key={attachment._id} className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
                       <div className="flex items-center space-x-3">
-                        <FaFileUpload className="text-gray-400" />
+                        {getFileIcon(attachment.originalName)}
                         <div>
                           <p className="text-sm font-medium text-gray-900">{attachment.originalName}</p>
                           <p className="text-xs text-gray-500">
@@ -660,11 +680,11 @@ const TaskDetail: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {isPDF(attachment.originalName) && (
+                        {isViewable(attachment.originalName) && (
                           <button
-                            onClick={() => handleViewPDF(task._id, attachment._id)}
+                            onClick={() => handleViewFile(task._id, attachment._id)}
                             className="text-green-600 hover:text-green-800"
-                            title="View PDF"
+                            title={isPDF(attachment.originalName) ? "View PDF" : "View Image"}
                           >
                             <FaEye />
                           </button>
