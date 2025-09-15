@@ -10,7 +10,7 @@ interface SignupFormData {
   confirmPassword: string;
   phone: string;
   role: string;
-  department: string;
+  departmentId: string;
 }
 
 const Signup: React.FC = () => {
@@ -22,7 +22,7 @@ const Signup: React.FC = () => {
     confirmPassword: '',
     phone: '',
     role: 'employee',
-    department: '',
+    departmentId: '',
   });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ const Signup: React.FC = () => {
       const deps = await authService.getDepartments();
       setDepartments(deps);
       if (deps.length > 0) {
-        setFormData(prev => ({ ...prev, department: deps[0]._id }));
+        setFormData(prev => ({ ...prev, departmentId: deps[0]._id }));
       }
     } catch (error) {
       console.error('Failed to load departments:', error);
@@ -78,7 +78,7 @@ const Signup: React.FC = () => {
         password: formData.password,
         phone: formData.phone,
         role: formData.role,
-        department: formData.department,
+        departmentId: formData.departmentId,
       };
 
       const response = await authService.register(registerData);
@@ -251,13 +251,13 @@ const Signup: React.FC = () => {
         </div>
 
         <div className="mb-6">
-          <label htmlFor="department" className="block mb-1 text-sm font-medium text-gray-700">
+          <label htmlFor="departmentId" className="block mb-1 text-sm font-medium text-gray-700">
             Department
           </label>
           <select
-            name="department"
-            id="department"
-            value={formData.department}
+            name="departmentId"
+            id="departmentId"
+            value={formData.departmentId}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             required
