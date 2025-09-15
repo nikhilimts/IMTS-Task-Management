@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes } from 'react-icons/fa';
+import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
-import ProgressCard from '../components/ProgressCard'; // ✅ Make sure the path is correct
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import authService from '../services/authService';
+import ProgressCard from '../components/ProgressCard';
 
 // ✅ Task type
 interface Task {
@@ -42,7 +45,21 @@ const getPriorityColor = (priority: string) => {
 };
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API call fails
+      authService.logout();
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row h-screen font-sans bg-gray-100">
@@ -64,13 +81,20 @@ const AdminDashboard: React.FC = () => {
           </div>
         </nav>
         <div className="p-4 mt-auto border-t absolute bottom-0 w-full">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 mb-3">
             <img src="/avatar.png" alt="Admin" className="w-10 h-10 rounded-full object-cover" />
             <div>
               <div className="font-bold">Admin</div>
               <div className="text-sm text-gray-500">admin@gmail.com</div>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-2 p-2 rounded-md hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"
+          >
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
