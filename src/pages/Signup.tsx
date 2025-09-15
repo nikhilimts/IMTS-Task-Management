@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import authService, { type RegisterData, type Department } from '../services/authService';
 
 interface SignupFormData {
@@ -43,6 +42,15 @@ const Signup: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to load departments:', error);
+      // Set default departments if API call fails
+      const defaultDepartments = [
+        { _id: 'hr', name: 'Human Resources', description: 'HR Department', isActive: true },
+        { _id: 'it', name: 'Information Technology', description: 'IT Department', isActive: true },
+        { _id: 'finance', name: 'Finance', description: 'Finance Department', isActive: true },
+        { _id: 'marketing', name: 'Marketing', description: 'Marketing Department', isActive: true }
+      ];
+      setDepartments(defaultDepartments);
+      setFormData(prev => ({ ...prev, department: defaultDepartments[0]._id }));
     }
   };
 
@@ -298,7 +306,6 @@ const Signup: React.FC = () => {
           </p>
         </div>
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 };export default Signup;
