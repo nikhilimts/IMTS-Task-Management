@@ -40,11 +40,11 @@ const TaskDetail: React.FC = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const currentUser = authService.getCurrentUser();
 
-  // Permission checks based on user role
-  const isCreator = task?.createdBy?._id === currentUser?._id;
-  const isAssignee = task?.assignedTo?.some(assignment => assignment.user._id === currentUser?._id);
-  const canUpdateStatus = isCreator;
-  const canUpdateStage = isAssignee;
+  // Permission checks based on user role (only for existing tasks)
+  const isCreator = !isCreateMode && task?.createdBy?._id === currentUser?._id;
+  const isAssignee = !isCreateMode && task?.assignedTo?.some(assignment => assignment.user._id === currentUser?._id);
+  const canUpdateStatus = isCreateMode || isCreator; // Allow in create mode or if creator
+  const canUpdateStage = isCreateMode || isAssignee; // Allow in create mode or if assignee
 
   // Form data
   const [formData, setFormData] = useState<CreateTaskData>({
@@ -57,6 +57,14 @@ const TaskDetail: React.FC = () => {
     attachments: []
   });
 
+  // Debug logging
+  console.log('Create mode debug:', {
+    isCreateMode,
+    editMode,
+    formDataTitle: formData.title,
+    canEdit: editMode || isCreateMode
+  });
+
   // Remark states
   const [newRemark, setNewRemark] = useState('');
   const [remarkCategory, setRemarkCategory] = useState<'creator' | 'assignee' | 'general' | 'auto'>('auto');
@@ -65,6 +73,8 @@ const TaskDetail: React.FC = () => {
   // File upload states
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const loadInitialData = async () => {
     try {
@@ -922,19 +932,95 @@ const TaskDetail: React.FC = () => {
               </h2>
               
               {editMode || isCreateMode ? (
-                <div className="space-y-2">
-                  {users.filter(user => user.role !== 'admin').map((user) => (
-                    <label key={user._id} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={formData.assignedTo?.includes(user._id) || false}
-                        onChange={() => handleAssignedUsersChange(user._id)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-900">{user.name}</span>
-                      <span className="text-xs text-gray-500">({user.role})</span>
-                    </label>
-                  ))}
+                <div className="space-y-4">
+                  {/* Search Input */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search users by name or department..."
+                      value={userSearch}
+                      onChange={(e) => {
+                        setUserSearch(e.target.value);
+                        setShowUserDropdown(e.target.value.length > 0);
+                      }}
+                      onFocus={() => setShowUserDropdown(userSearch.length > 0)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    
+                    {/* Dropdown with filtered users */}
+                    {showUserDropdown && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        {users
+                          .filter(user => 
+                            user.role !== 'admin' && 
+                            (user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                             user.email.toLowerCase().includes(userSearch.toLowerCase()))
+                          )
+                          .map((user) => (
+                            <div
+                              key={user._id}
+                              onClick={() => {
+                                handleAssignedUsersChange(user._id);
+                                setUserSearch('');
+                                setShowUserDropdown(false);
+                              }}
+                              className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer"
+                            >
+                              <div className="flex items-center space-x-3">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.assignedTo?.includes(user._id) || false}
+                                  onChange={() => handleAssignedUsersChange(user._id)}
+                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {user.email} • {user.role}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        }
+                        {users.filter(user => 
+                          user.role !== 'admin' && 
+                          (user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                           user.email.toLowerCase().includes(userSearch.toLowerCase()))
+                        ).length === 0 && (
+                          <div className="p-3 text-gray-500 text-sm">No users found</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Users Display */}
+                  {formData.assignedTo && formData.assignedTo.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-700">Selected Users:</p>
+                      {formData.assignedTo.map((userId) => {
+                        const user = users.find(u => u._id === userId);
+                        return user ? (
+                          <div key={userId} className="flex items-center justify-between p-2 bg-blue-50 rounded-md">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                              <p className="text-xs text-gray-500">
+                                {user.email} • {user.role}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleAssignedUsersChange(userId)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <FaTimes />
+                            </button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+
                   {!isCreateMode && (
                     <button
                       onClick={handleAssignTask}
