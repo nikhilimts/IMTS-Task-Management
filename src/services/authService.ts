@@ -11,7 +11,7 @@ export interface RegisterData {
   password: string;
   phone: string;
   role: string;
-  department: string;
+  departmentId: string;
 }
 
 export interface User {
