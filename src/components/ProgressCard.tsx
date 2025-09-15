@@ -3,10 +3,11 @@ import React from 'react';
 interface ProgressCardProps {
   percentage: number;
   label: string;
+  count?: number;
   color?: string;
 }
 
-const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, color }) => {
+const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, count, color }) => {
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const arcLength = (3 / 4) * circumference;
@@ -14,13 +15,6 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, color })
 
   const cx = 80;
   const cy = 80;
-
-  const startAngle = (135 * Math.PI) / 180;
-  const endAngle = ((135 - 270) * Math.PI) / 180;
-
-  // Position for arc labels (not used for 0% & 100% now)
-  const startX = cx + radius * Math.cos(startAngle);
-  const endX = cx + radius * Math.cos(endAngle);
 
   // Container width to position labels
   const containerWidth = 160; // same as svg width
@@ -98,7 +92,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, color })
         {/* Percentage inside arc */}
         <text
           x={cx}
-          y={65}
+          y={count !== undefined ? 60 : 65}
           textAnchor="middle"
           fontSize="28"
           fontWeight="bold"
@@ -108,10 +102,25 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, color })
           {percentage}%
         </text>
 
+        {/* Count display if provided */}
+        {count !== undefined && (
+          <text
+            x={cx}
+            y={80}
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="500"
+            fill="#6b7280"
+            dominantBaseline="middle"
+          >
+            ({count} tasks)
+          </text>
+        )}
+
         {/* Label below percentage */}
         <text
           x={cx}
-          y={90}
+          y={count !== undefined ? 95 : 90}
           textAnchor="middle"
           fontSize="16"
           fontWeight="600"
