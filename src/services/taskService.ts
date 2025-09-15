@@ -154,6 +154,28 @@ export interface TaskStatsResponse {
   };
 }
 
+export interface DashboardStatsResponse {
+  success: boolean;
+  data: {
+    notStarted: {
+      count: number;
+      label: string;
+      percentage: number;
+    };
+    pending: {
+      count: number;
+      label: string;
+      percentage: number;
+    };
+    done: {
+      count: number;
+      label: string;
+      percentage: number;
+    };
+    totalAssigned: number;
+  };
+}
+
 export interface RemarkData {
   text: string;
   category?: 'creator' | 'assignee' | 'general' | 'auto';
@@ -308,6 +330,14 @@ class TaskService {
    */
   async getTaskStats(): Promise<TaskStatsResponse> {
     const response = await api.get('/tasks/stats');
+    return response.data;
+  }
+
+  /**
+   * Get dashboard statistics for progress cards
+   */
+  async getDashboardStats(): Promise<DashboardStatsResponse> {
+    const response = await api.get('/tasks/dashboard-stats');
     return response.data;
   }
 
