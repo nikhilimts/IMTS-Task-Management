@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/authService';
 import taskService from '../services/taskService';
-import type { Task as TaskType, TaskFilters } from '../services/taskService';
+import type { Task as TaskType, TaskFilters, DashboardStatsResponse } from '../services/taskService';
 import ProgressCard from '../components/ProgressCard';
 
 // ✅ Real task interfaces and data
@@ -42,6 +42,12 @@ const AdminDashboard: React.FC = () => {
     urgent_priority: 0,
     overdue: 0,
   });
+  const [dashboardStats, setDashboardStats] = useState({
+    notStarted: { count: 0, label: 'Not Started', percentage: 0 },
+    pending: { count: 0, label: 'Pending', percentage: 0 },
+    done: { count: 0, label: 'Done', percentage: 0 },
+    totalAssigned: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<TaskFilters>({
     page: 1,
@@ -63,6 +69,7 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     loadTasks();
     loadTaskStats();
+    loadDashboardStats();
   }, [filters]);
 
   const loadTasks = async () => {
@@ -85,6 +92,16 @@ const AdminDashboard: React.FC = () => {
       setTaskStats(response.data);
     } catch (error) {
       console.error('Failed to load task stats:', error);
+    }
+  };
+
+  const loadDashboardStats = async () => {
+    try {
+      const response = await taskService.getDashboardStats();
+      setDashboardStats(response.data);
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+      toast.error('Failed to load dashboard statistics');
     }
   };
 
@@ -433,26 +450,24 @@ const AdminDashboard: React.FC = () => {
         )}
 
         {/* Progress Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <ProgressCard 
-            percentage={taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0} 
-            label={`Completed (${taskStats.completed})`} 
-            color="green" 
+            percentage={dashboardStats.notStarted.percentage} 
+            label={dashboardStats.notStarted.label} 
+            count={dashboardStats.notStarted.count}
+            color="#6b7280" 
           />
           <ProgressCard 
-            percentage={taskStats.total > 0 ? Math.round((taskStats.in_progress / taskStats.total) * 100) : 0} 
-            label={`In Progress (${taskStats.in_progress})`} 
-            color="blue" 
+            percentage={dashboardStats.pending.percentage} 
+            label={dashboardStats.pending.label} 
+            count={dashboardStats.pending.count}
+            color="#8b5cf6" 
           />
           <ProgressCard 
-            percentage={taskStats.total > 0 ? Math.round((taskStats.created / taskStats.total) * 100) : 0} 
-            label={`Created (${taskStats.created})`} 
-            color="purple" 
-          />
-          <ProgressCard 
-            percentage={taskStats.total > 0 ? Math.round((taskStats.overdue / taskStats.total) * 100) : 0} 
-            label={`Overdue (${taskStats.overdue})`} 
-            color="red" 
+            percentage={dashboardStats.done.percentage} 
+            label={dashboardStats.done.label} 
+            count={dashboardStats.done.count}
+            color="#059669" 
           />
         </div>
 
