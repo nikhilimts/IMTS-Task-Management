@@ -42,15 +42,7 @@ const Signup: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to load departments:', error);
-      // Set default departments if API call fails
-      const defaultDepartments = [
-        { _id: 'hr', name: 'Human Resources', description: 'HR Department', isActive: true },
-        { _id: 'it', name: 'Information Technology', description: 'IT Department', isActive: true },
-        { _id: 'finance', name: 'Finance', description: 'Finance Department', isActive: true },
-        { _id: 'marketing', name: 'Marketing', description: 'Marketing Department', isActive: true }
-      ];
-      setDepartments(defaultDepartments);
-      setFormData(prev => ({ ...prev, department: defaultDepartments[0]._id }));
+      toast.error('Failed to load departments. Please try again.');
     }
   };
 
