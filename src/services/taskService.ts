@@ -201,34 +201,45 @@ class TaskService {
    * Create a new task
    */
   async createTask(taskData: CreateTaskData): Promise<TaskResponse> {
-    const formData = new FormData();
-    
-    formData.append('title', taskData.title);
-    formData.append('description', taskData.description);
-    formData.append('deadline', taskData.deadline);
-    formData.append('priority', taskData.priority);
-    
-    if (taskData.assignedTo) {
-      formData.append('assignedTo', JSON.stringify(taskData.assignedTo));
-    }
-    
-    if (taskData.tags) {
-      formData.append('tags', JSON.stringify(taskData.tags));
-    }
-    
-    if (taskData.attachments) {
+    // If there are files, use FormData
+    if (taskData.attachments && taskData.attachments.length > 0) {
+      const formData = new FormData();
+      
+      formData.append('title', taskData.title);
+      formData.append('description', taskData.description);
+      formData.append('deadline', taskData.deadline);
+      formData.append('priority', taskData.priority);
+      
+      if (taskData.assignedTo) {
+        formData.append('assignedTo', JSON.stringify(taskData.assignedTo));
+      }
+      
+      if (taskData.tags) {
+        formData.append('tags', JSON.stringify(taskData.tags));
+      }
+      
       taskData.attachments.forEach(file => {
         formData.append('attachments', file);
       });
-    }
 
-    const response = await api.post('/tasks', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    
-    return response.data;
+      const response = await api.post('/tasks', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } else {
+      // If no files, use regular JSON
+      const response = await api.post('/tasks', {
+        title: taskData.title,
+        description: taskData.description,
+        deadline: taskData.deadline,
+        priority: taskData.priority,
+        assignedTo: taskData.assignedTo || [],
+        tags: taskData.tags || []
+      });
+      return response.data;
+    }
   }
 
   /**
