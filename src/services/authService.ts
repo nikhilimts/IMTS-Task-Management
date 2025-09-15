@@ -42,8 +42,7 @@ export interface AuthResponse {
 export interface Department {
   _id: string;
   name: string;
-  description: string;
-  isActive: boolean;
+  id: string;
 }
 
 class AuthService {
@@ -112,8 +111,24 @@ class AuthService {
   }
 
   async getDepartments(): Promise<Department[]> {
-    const response = await api.get('/users/departments');
-    return response.data.data || response.data;
+    // Call departments endpoint without authentication for signup page
+    const response = await fetch('http://localhost:5000/api/users/departments', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch departments');
+    }
+    
+    const data = await response.json();
+    // Handle the response structure: { success: true, data: [...], count: 7 }
+    if (data.success) {
+      return data.data;
+    }
+    return data.data || [];
   }
 }
 
