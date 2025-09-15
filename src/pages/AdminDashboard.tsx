@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -47,6 +47,7 @@ const getPriorityColor = (priority: string) => {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -60,6 +61,24 @@ const AdminDashboard: React.FC = () => {
       navigate('/login');
     }
   };
+
+  const handleCreateTask = () => {
+    navigate('/create-task');
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userDropdownOpen && !(event.target as Element).closest('.user-dropdown')) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userDropdownOpen]);
 
   return (
     <div className="flex flex-col md:flex-row h-screen font-sans bg-gray-100">
@@ -119,11 +138,32 @@ const AdminDashboard: React.FC = () => {
             <AiOutlineSearch className="absolute left-12 md:left-3 top-2.5 text-gray-500" />
           </div>
           <div className="flex space-x-3 items-center ml-auto">
-            <button className="bg-blue-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm">
+            <button 
+              onClick={handleCreateTask}
+              className="bg-blue-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-blue-700 transition-colors"
+            >
               <BsFillPlusCircleFill /> <span>Create Task</span>
             </button>
-            <FaBell className="text-xl text-gray-600" />
-            <FaUserCircle className="text-xl text-gray-600" />
+            <FaBell className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" />
+            <div className="relative user-dropdown">
+              <FaUserCircle 
+                className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" 
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              />
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
+                  <div className="py-1">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <FaSignOutAlt className="mr-2" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
