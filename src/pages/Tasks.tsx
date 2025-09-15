@@ -130,7 +130,7 @@ const Tasks: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate('/create-task')}
+                onClick={() => navigate('/tasks/new')}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
               >
                 <FaPlus />
