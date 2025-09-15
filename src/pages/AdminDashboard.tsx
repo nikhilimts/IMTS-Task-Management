@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaPlus, FaEye, FaEdit, FaTrash, FaDownload, FaComment } from 'react-icons/fa';
+import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaPlus, FaEye } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -129,29 +129,6 @@ const AdminDashboard: React.FC = () => {
     }));
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      try {
-        await taskService.deleteTask(taskId);
-        toast.success('Task deleted successfully');
-        loadTasks(); // Reload tasks
-      } catch (error) {
-        console.error('Failed to delete task:', error);
-        toast.error('Failed to delete task');
-      }
-    }
-  };
-
-  const handleStatusChange = async (taskId: string, status: string) => {
-    try {
-      await taskService.updateTaskStatus(taskId, { status: status as any });
-      toast.success('Task status updated successfully');
-      loadTasks(); // Reload tasks
-    } catch (error) {
-      console.error('Failed to update task status:', error);
-      toast.error('Failed to update task status');
-    }
-  };
 
   // Helper functions
   // Helper functions
@@ -198,19 +175,6 @@ const AdminDashboard: React.FC = () => {
       case 'high': return 'bg-orange-500 text-white';
       case 'medium': return 'bg-yellow-400 text-white';
       case 'low': return 'bg-green-400 text-white';
-      default: return 'bg-gray-400 text-white';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'created': return 'bg-blue-500 text-white';
-      case 'assigned': return 'bg-purple-500 text-white';
-      case 'in_progress': return 'bg-yellow-500 text-white';
-      case 'completed': return 'bg-green-500 text-white';
-      case 'approved': return 'bg-green-600 text-white';
-      case 'rejected': return 'bg-red-500 text-white';
-      case 'transferred': return 'bg-gray-500 text-white';
       default: return 'bg-gray-400 text-white';
     }
   };
@@ -516,7 +480,6 @@ const AdminDashboard: React.FC = () => {
                   <th className="py-2 px-4 whitespace-nowrap">Creator</th>
                   <th className="py-2 px-4 whitespace-nowrap">Task Title</th>
                   <th className="py-2 px-4 whitespace-nowrap">Assigned To</th>
-                  <th className="py-2 px-4 whitespace-nowrap">Status</th>
                   <th className="py-2 px-4 whitespace-nowrap">Priority</th>
                   <th className="py-2 px-4 whitespace-nowrap">Stage</th>
                   <th className="py-2 px-4 whitespace-nowrap">Deadline</th>
@@ -529,7 +492,6 @@ const AdminDashboard: React.FC = () => {
                     <td className="py-2 px-4">
                       <div>
                         <div className="font-medium">{task.createdBy.name}</div>
-                        <div className="text-xs text-gray-500">{task.createdBy.role}</div>
                       </div>
                     </td>
                     <td className="py-2 px-4">
@@ -559,21 +521,6 @@ const AdminDashboard: React.FC = () => {
                       )}
                     </td>
                     <td className="py-2 px-4">
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task._id, e.target.value)}
-                        className={`px-2 py-1 rounded-full text-xs border-none ${getStatusColor(task.status)}`}
-                      >
-                        <option value="created">Created</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="transferred">Transferred</option>
-                      </select>
-                    </td>
-                    <td className="py-2 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs ${getPriorityColor(task.priority)}`}>
                         {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
                       </span>
@@ -599,49 +546,6 @@ const AdminDashboard: React.FC = () => {
                           onClick={() => navigate(`/tasks/${task._id}`)}
                         >
                           <FaEye />
-                        </button>
-                        <button 
-                          className="text-green-500 hover:text-green-700 p-1"
-                          title="Edit Task"
-                          onClick={() => navigate(`/tasks/${task._id}/edit`)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          className="text-purple-500 hover:text-purple-700 p-1"
-                          title="Add Comment"
-                          onClick={() => {
-                            const comment = prompt('Add a comment:');
-                            if (comment) {
-                              taskService.addRemark(task._id, { text: comment })
-                                .then(() => {
-                                  toast.success('Comment added successfully');
-                                  loadTasks();
-                                })
-                                .catch(() => toast.error('Failed to add comment'));
-                            }
-                          }}
-                        >
-                          <FaComment />
-                        </button>
-                        {task.attachments.length > 0 && (
-                          <button 
-                            className="text-indigo-500 hover:text-indigo-700 p-1"
-                            title="Download Attachments"
-                            onClick={() => {
-                              // Download first attachment as example
-                              taskService.downloadAttachment(task._id, task.attachments[0]._id);
-                            }}
-                          >
-                            <FaDownload />
-                          </button>
-                        )}
-                        <button 
-                          className="text-red-500 hover:text-red-700 p-1"
-                          title="Delete Task"
-                          onClick={() => handleDeleteTask(task._id)}
-                        >
-                          <FaTrash />
                         </button>
                       </div>
                     </td>
