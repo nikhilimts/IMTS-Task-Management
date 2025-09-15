@@ -6,15 +6,15 @@ import authService from './services/authService';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
+import CreateTask from './pages/CreateTask';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
+  const user = authService.getCurrentUser();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     // Clear any invalid tokens
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('refreshToken');
+    authService.logout();
     return <Navigate to="/login" replace />;
   }
 
@@ -68,6 +68,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-task"
+          element={
+            <ProtectedRoute>
+              <CreateTask />
             </ProtectedRoute>
           }
         />
