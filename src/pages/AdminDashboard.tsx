@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaPlus, FaEye, FaUsers } from 'react-icons/fa';
+import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/authService';
 import taskService from '../services/taskService';
-import type { Task as TaskType, TaskFilters, DashboardStatsResponse } from '../services/taskService';
+import type { Task as TaskType, TaskFilters } from '../services/taskService';
 import ProgressCard from '../components/ProgressCard';
 import GroupTaskView from '../components/GroupTaskView';
 
-// ✅ Real task interfaces and data
-interface TaskStats {
-  total: number;
-  created: number;
-  assigned: number;
-  in_progress: number;
-  completed: number;
-  approved: number;
-  rejected: number;
-  high_priority: number;
-  urgent_priority: number;
-  overdue: number;
-}
+// interface TaskStats {
+//   total: number;
+//   created: number;
+//   assigned: number;
+//   in_progress: number;
+//   completed: number;
+//   approved: number;
+//   rejected: number;
+//   high_priority: number;
+//   urgent_priority: number;
+//   overdue: number;
+// }
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -33,18 +32,6 @@ const AdminDashboard: React.FC = () => {
   
   // Task management state
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [taskStats, setTaskStats] = useState<TaskStats>({
-    total: 0,
-    created: 0,
-    assigned: 0,
-    in_progress: 0,
-    completed: 0,
-    approved: 0,
-    rejected: 0,
-    high_priority: 0,
-    urgent_priority: 0,
-    overdue: 0,
-  });
   const [dashboardStats, setDashboardStats] = useState({
     notStarted: { count: 0, label: 'Not Started', percentage: 0 },
     pending: { count: 0, label: 'Pending', percentage: 0 },
@@ -71,7 +58,6 @@ const AdminDashboard: React.FC = () => {
   // Load tasks and stats on component mount
   useEffect(() => {
     loadTasks();
-    loadTaskStats();
     loadDashboardStats();
     loadCurrentUser();
   }, [filters]);
@@ -96,15 +82,6 @@ const AdminDashboard: React.FC = () => {
       toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadTaskStats = async () => {
-    try {
-      const response = await taskService.getTaskStats();
-      setTaskStats(response.data);
-    } catch (error) {
-      console.error('Failed to load task stats:', error);
     }
   };
 
@@ -583,7 +560,7 @@ const AdminDashboard: React.FC = () => {
                             <button 
                               className="text-blue-500 hover:text-blue-700 p-1"
                               title="View Details"
-                              onClick={() => navigate(`/tasks/${task._id}`)}
+                              onClick={() => navigate(task.isGroupTask ? `/tasks/${task._id}/group` : `/tasks/${task._id}`)}
                             >
                               <FaEye />
                             </button>
