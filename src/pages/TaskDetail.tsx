@@ -56,7 +56,6 @@ const TaskDetail: React.FC = () => {
 
   // Remark states
   const [newRemark, setNewRemark] = useState('');
-  const [remarkCategory, setRemarkCategory] = useState<'creator' | 'assignee' | 'general' | 'auto'>('auto');
   const [addingRemark, setAddingRemark] = useState(false);
 
   // File upload states
@@ -235,21 +234,9 @@ const TaskDetail: React.FC = () => {
     try {
       setAddingRemark(true);
       
-      // Determine the actual category when 'auto' is selected
-      let actualCategory = remarkCategory;
-      if (remarkCategory === 'auto') {
-        if (isCreator) {
-          actualCategory = 'creator';
-        } else if (isAssignee) {
-          actualCategory = 'assignee';
-        } else {
-          actualCategory = 'general';
-        }
-      }
-      
       const remarkData: RemarkData = {
         text: newRemark,
-        category: actualCategory
+        category: 'auto' as const // Let backend automatically determine the category
       };
       
       const response = await taskService.addRemark(id, remarkData);
@@ -768,19 +755,7 @@ const TaskDetail: React.FC = () => {
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <div className="flex items-center justify-between mt-2">
-                        <select
-                          value={remarkCategory}
-                          onChange={(e) => setRemarkCategory(e.target.value as any)}
-                          className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="auto">
-                            Auto ({isCreator ? 'Creator' : isAssignee ? 'Assignee' : 'General'})
-                          </option>
-                          <option value="general">General</option>
-                          <option value="creator">Creator</option>
-                          <option value="assignee">Assignee</option>
-                        </select>
+                      <div className="flex justify-end mt-2">
                         <button
                           onClick={handleAddRemark}
                           disabled={!newRemark.trim() || addingRemark}
