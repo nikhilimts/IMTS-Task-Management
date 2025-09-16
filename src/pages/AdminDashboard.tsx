@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers } from 'react-icons/fa';
+import { FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import authService from '../services/authService';
 import taskService from '../services/taskService';
 import type { Task as TaskType, TaskFilters } from '../services/taskService';
 import ProgressCard from '../components/ProgressCard';
+import NotificationBell from '../components/NotificationBell';
 import GroupTaskView from '../components/GroupTaskView';
 
 // interface TaskStats {
@@ -256,7 +257,7 @@ const AdminDashboard: React.FC = () => {
             >
               <BsFillPlusCircleFill /> <span className="hidden sm:inline">Create Task</span><span className="sm:hidden">Create</span>
             </button>
-            <FaBell className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" />
+            <NotificationBell />
             <div className="relative user-dropdown">
               <FaUserCircle 
                 className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" 
