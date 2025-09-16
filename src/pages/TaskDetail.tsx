@@ -9,6 +9,7 @@ import taskService from '../services/taskService';
 import authService from '../services/authService';
 import api from '../services/api';
 import type { Task, CreateTaskData, RemarkData } from '../services/taskService';
+import NotificationBell from '../components/NotificationBell';
 
 interface User {
   _id: string;
@@ -414,6 +415,7 @@ const TaskDetail: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-3">
+              <NotificationBell />
               {!isCreateMode && (
                 <div className="text-sm text-gray-500">
                   View task details
