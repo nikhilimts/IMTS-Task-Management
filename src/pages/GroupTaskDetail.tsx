@@ -21,30 +21,10 @@ const GroupTaskDetail: React.FC = () => {
 
   // Check if current user is creator
   const isCreator = task?.createdBy?._id === currentUser?._id;
-  const isAssignee = task?.assignedTo?.some(assignment => assignment.user._id === currentUser?._id);
 
   // Remark states
   const [newRemark, setNewRemark] = useState('');
-  const [remarkCategory, setRemarkCategory] = useState<'creator' | 'assignee' | 'general' | 'auto'>('auto');
   const [addingRemark, setAddingRemark] = useState(false);
-
-  // Auto-determine remark category based on user role
-  const getRemarkCategory = (): 'creator' | 'assignee' | 'general' => {
-    if (!currentUser || !task) return 'general';
-    
-    // If current user is the task creator
-    if (task.createdBy._id === currentUser._id) {
-      return 'creator';
-    }
-    
-    // If current user is an assignee
-    if (task.assignedTo.some(assignment => assignment.user._id === currentUser._id)) {
-      return 'assignee';
-    }
-    
-    // Otherwise general
-    return 'general';
-  };
 
   // Handle deadline update for creators
   const handleSave = async () => {
@@ -122,10 +102,9 @@ const GroupTaskDetail: React.FC = () => {
 
     try {
       setAddingRemark(true);
-      const category = remarkCategory === 'auto' ? getRemarkCategory() : remarkCategory;
       const remarkData = {
         text: newRemark,
-        category
+        category: 'auto' as const // Let backend automatically determine the category
       };
 
       const response = await taskService.addRemark(id, remarkData);
@@ -355,19 +334,7 @@ const GroupTaskDetail: React.FC = () => {
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="flex items-center justify-between mt-2">
-                  <select
-                    value={remarkCategory}
-                    onChange={(e) => setRemarkCategory(e.target.value as any)}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="auto">
-                      Auto ({isCreator ? 'Creator' : isAssignee ? 'Assignee' : 'General'})
-                    </option>
-                    <option value="general">General</option>
-                    <option value="creator">Creator</option>
-                    <option value="assignee">Assignee</option>
-                  </select>
+                <div className="flex justify-end mt-2">
                   <button
                     onClick={handleAddRemark}
                     disabled={!newRemark.trim() || addingRemark}
