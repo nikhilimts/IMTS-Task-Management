@@ -14,6 +14,7 @@ const GroupTaskDetail: React.FC = () => {
 
   // Remark states
   const [newRemark, setNewRemark] = useState('');
+  const [remarkCategory, setRemarkCategory] = useState<'creator' | 'assignee' | 'general' | 'auto'>('auto');
   const [addingRemark, setAddingRemark] = useState(false);
 
   // Auto-determine remark category based on user role
@@ -62,7 +63,7 @@ const GroupTaskDetail: React.FC = () => {
 
     try {
       setAddingRemark(true);
-      const category = getRemarkCategory();
+      const category = remarkCategory === 'auto' ? getRemarkCategory() : remarkCategory;
       const remarkData = {
         text: newRemark,
         category
@@ -127,29 +128,45 @@ const GroupTaskDetail: React.FC = () => {
           <h2 className="text-lg font-medium text-gray-900 mb-4">Remarks & Comments</h2>
 
           {/* Add New Remark */}
-          <div className="mb-4">
-            <div className="flex space-x-2">
-              <textarea
-                value={newRemark}
-                onChange={(e) => setNewRemark(e.target.value)}
-                placeholder="Add a remark or comment..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={3}
-              />
-              <button
-                onClick={handleAddRemark}
-                disabled={!newRemark.trim() || addingRemark}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              >
-                {addingRemark ? 'Adding...' : 'Add Remark'}
-              </button>
+          <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <div className="flex-1">
+                <textarea
+                  value={newRemark}
+                  onChange={(e) => setNewRemark(e.target.value)}
+                  placeholder="Add a remark or comment..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex items-center justify-between mt-2">
+                  <select
+                    value={remarkCategory}
+                    onChange={(e) => setRemarkCategory(e.target.value as any)}
+                    className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="auto">Auto Category</option>
+                    <option value="general">General</option>
+                    <option value="creator">Creator</option>
+                    <option value="assignee">Assignee</option>
+                  </select>
+                  <button
+                    onClick={handleAddRemark}
+                    disabled={!newRemark.trim() || addingRemark}
+                    className="px-4 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {addingRemark ? 'Adding...' : 'Add Remark'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Existing Remarks */}
           <div className="space-y-3">
             {(() => {
+              // Combine all remarks from different categories into one array
               const allRemarks = [];
+              
               if (task.remarks?.creator) {
                 allRemarks.push(...task.remarks.creator.map(remark => ({ ...remark, category: 'creator' })));
               }
@@ -159,30 +176,60 @@ const GroupTaskDetail: React.FC = () => {
               if (task.remarks?.general) {
                 allRemarks.push(...task.remarks.general.map(remark => ({ ...remark, category: 'general' })));
               }
+              
+              // Sort by creation date (latest first)
               allRemarks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-              return allRemarks.map((remark, index) => (
-                <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-medium text-gray-800">{remark.author.name}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          remark.category === 'creator' ? 'bg-blue-500 text-white' :
-                          remark.category === 'assignee' ? 'bg-emerald-500 text-white' :
-                          'bg-slate-500 text-white'
-                        }`}>
-                          {remark.category}
-                        </span>
+              
+              if (allRemarks.length === 0) {
+                return <p className="text-gray-500 text-sm">No remarks yet</p>;
+              }
+              
+              return allRemarks.map((remark, index) => {
+                // Get styling based on category
+                const getCategoryStyle = (category: string) => {
+                  switch (category) {
+                    case 'creator':
+                      return 'bg-blue-50 border-l-4 border-blue-400';
+                    case 'assignee':
+                      return 'bg-orange-50 border-l-4 border-orange-400';
+                    case 'general':
+                      return 'bg-gray-50 border-l-4 border-gray-400';
+                    default:
+                      return 'bg-gray-50 border-l-4 border-gray-400';
+                  }
+                };
+                
+                const getCategoryLabel = (category: string) => {
+                  switch (category) {
+                    case 'creator':
+                      return 'Creator';
+                    case 'assignee':
+                      return 'Assignee';
+                    case 'general':
+                      return 'General';
+                    default:
+                      return 'General';
+                  }
+                };
+                
+                return (
+                  <div key={`${remark.category}-${index}`} className={`p-3 rounded-r-md ${getCategoryStyle(remark.category)}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-800">{remark.text}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs text-gray-500">
+                            By {remark.author?.name} • {new Date(remark.createdAt).toLocaleString()}
+                          </p>
+                          <span className="text-xs px-2 py-1 bg-white bg-opacity-50 rounded-full">
+                            {getCategoryLabel(remark.category)}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-gray-700">{remark.text}</p>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(remark.createdAt).toLocaleString()}
-                    </span>
                   </div>
-                </div>
-              ));
+                );
+              });
             })()}
           </div>
         </div>
