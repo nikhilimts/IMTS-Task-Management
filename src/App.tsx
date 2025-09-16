@@ -9,6 +9,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import TaskDetail from './pages/TaskDetail';
 import TaskCreate from './pages/TaskCreate';
 import Tasks from './pages/Tasks';
+import GroupTaskDetail from './pages/GroupTaskDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
@@ -94,6 +95,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TaskDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tasks/:id/group"
+          element={
+            <ProtectedRoute>
+              <GroupTaskDetail />
             </ProtectedRoute>
           }
         />
