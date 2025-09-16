@@ -94,6 +94,13 @@ const GroupTaskDetail: React.FC = () => {
   const total = task.assignedTo.length;
   const completed = task.assignedTo.filter(a => a.individualStage === 'done' || a.status === 'completed').length;
   const approved = task.assignedTo.filter(a => a.approval === 'approved').length;
+  const rejected = task.assignedTo.filter(a => a.approval === 'rejected').length;
+  
+  // Check if all tasks are approved (group task completion)
+  const allApproved = total > 0 && approved === total;
+  const groupTaskStatus = allApproved ? 'All tasks approved - Group task completed!' : 
+                         approved > 0 ? `${approved}/${total} tasks approved` : 
+                         'Pending approvals';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,7 +113,7 @@ const GroupTaskDetail: React.FC = () => {
           <button onClick={() => navigate('/dashboard')} className="px-3 py-1 bg-gray-200 rounded text-sm">Back</button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="p-4 bg-white rounded shadow">
             <div className="text-sm text-gray-500">Assignees</div>
             <div className="text-xl font-semibold">{total}</div>
@@ -118,6 +125,29 @@ const GroupTaskDetail: React.FC = () => {
           <div className="p-4 bg-white rounded shadow">
             <div className="text-sm text-gray-500">Approved</div>
             <div className="text-xl font-semibold">{approved}/{total}</div>
+          </div>
+          <div className="p-4 bg-white rounded shadow">
+            <div className="text-sm text-gray-500">Rejected</div>
+            <div className="text-xl font-semibold">{rejected}</div>
+          </div>
+        </div>
+
+        {/* Group Task Completion Status */}
+        <div className={`mb-4 p-4 rounded-lg shadow ${allApproved ? 'bg-green-50 border-2 border-green-200' : 'bg-gray-50'}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Group Task Status</div>
+              <div className={`text-lg font-semibold ${allApproved ? 'text-green-800' : 'text-gray-700'}`}>
+                {groupTaskStatus}
+              </div>
+            </div>
+            {allApproved && (
+              <div className="text-green-600">
+                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
           </div>
         </div>
 
