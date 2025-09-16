@@ -87,6 +87,14 @@ const Tasks: React.FC = () => {
     }
   };
 
+  const getStatusText = (task: Task) => {
+    // Show "Done" when task is completed and stage is done (for group tasks that are fully approved)
+    if (task.status === 'completed' && task.stage === 'done') {
+      return 'Done';
+    }
+    return task.status.replace('_', ' ');
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -302,7 +310,7 @@ const Tasks: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.status)}`}>
-                          {task.status.replace('_', ' ')}
+                          {getStatusText(task)}
                         </span>
                       </td>
                       <td className="px-6 py-4">
