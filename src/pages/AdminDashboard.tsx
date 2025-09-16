@@ -251,34 +251,13 @@ const AdminDashboard: React.FC = () => {
       <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
         {/* Header */}
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <div className="flex items-center w-full md:w-1/3 relative">
+          <div className="flex items-center">
             <button className="md:hidden text-2xl mr-3" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <FaTimes /> : <FaBars />}
             </button>
-            <form onSubmit={handleSearch} className="w-full flex">
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition-colors"
-              >
-                <FaSearch />
-              </button>
-            </form>
-            <AiOutlineSearch className="absolute left-12 md:left-3 top-2.5 text-gray-500" />
+            <h1 className="text-2xl font-semibold text-gray-800">Task Management Dashboard</h1>
           </div>
           <div className="flex space-x-3 items-center ml-auto">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-gray-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-gray-700 transition-colors"
-            >
-              <FaFilter /> <span>Filters</span>
-            </button>
             <button 
               onClick={handleCreateTask}
               className="bg-blue-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-blue-700 transition-colors"
@@ -308,104 +287,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={filters.status || ''}
-                  onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Status</option>
-                  <option value="created">Created</option>
-                  <option value="assigned">Assigned</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="transferred">Transferred</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                <select
-                  value={filters.priority || ''}
-                  onChange={(e) => handleFilterChange('priority', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Priority</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
-                <select
-                  value={filters.stage || ''}
-                  onChange={(e) => handleFilterChange('stage', e.target.value || undefined)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Stages</option>
-                  <option value="planning">Planning</option>
-                  <option value="development">Development</option>
-                  <option value="testing">Testing</option>
-                  <option value="review">Review</option>
-                  <option value="deployment">Deployment</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-                <select
-                  value={filters.sortBy || 'createdAt'}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="createdAt">Created Date</option>
-                  <option value="deadline">Deadline</option>
-                  <option value="priority">Priority</option>
-                  <option value="status">Status</option>
-                  <option value="title">Title</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm font-medium text-gray-700">Sort Order:</label>
-                <button
-                  onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className={`px-3 py-1 rounded-md text-sm ${
-                    filters.sortOrder === 'desc' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-200 text-gray-700'
-                  }`}
-                >
-                  {filters.sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-                </button>
-              </div>
-              <button
-                onClick={() => {
-                  setFilters({
-                    page: 1,
-                    limit: 10,
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc',
-                  });
-                  setSearchTerm('');
-                }}
-                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Progress Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <ProgressCard 
@@ -426,6 +307,139 @@ const AdminDashboard: React.FC = () => {
             count={dashboardStats.done.count}
             color="#059669" 
           />
+        </div>
+
+        {/* Search and Filter Section - Above Task List */}
+        <div className="space-y-4 mb-6">
+          {/* Search Bar */}
+          <div className="bg-white p-4 rounded-lg shadow-md">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-gray-900">Search & Filter Tasks</h3>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="bg-gray-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-gray-700 transition-colors"
+              >
+                <FaFilter /> <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
+              </button>
+            </div>
+            
+            <div className="flex items-center relative">
+              <form onSubmit={handleSearch} className="w-full flex">
+                <input
+                  type="text"
+                  placeholder="Search tasks..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition-colors"
+                >
+                  <FaSearch />
+                </button>
+              </form>
+              <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-500" />
+            </div>
+
+            {/* Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select
+                      value={filters.status || ''}
+                      onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Status</option>
+                      <option value="created">Created</option>
+                      <option value="assigned">Assigned</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="completed">Completed</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                      <option value="transferred">Transferred</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                    <select
+                      value={filters.priority || ''}
+                      onChange={(e) => handleFilterChange('priority', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Priority</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
+                    <select
+                      value={filters.stage || ''}
+                      onChange={(e) => handleFilterChange('stage', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">All Stages</option>
+                      <option value="planning">Planning</option>
+                      <option value="development">Development</option>
+                      <option value="testing">Testing</option>
+                      <option value="review">Review</option>
+                      <option value="deployment">Deployment</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select
+                      value={filters.sortBy || 'createdAt'}
+                      onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="createdAt">Created Date</option>
+                      <option value="deadline">Deadline</option>
+                      <option value="priority">Priority</option>
+                      <option value="status">Status</option>
+                      <option value="title">Title</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-700">Sort Order:</label>
+                    <button
+                      onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className={`px-3 py-1 rounded-md text-sm ${
+                        filters.sortOrder === 'desc' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {filters.sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setFilters({
+                        page: 1,
+                        limit: 10,
+                        sortBy: 'createdAt',
+                        sortOrder: 'desc',
+                      });
+                      setSearchTerm('');
+                    }}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Task Table */}
