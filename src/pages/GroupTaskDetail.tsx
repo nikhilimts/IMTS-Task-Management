@@ -121,6 +121,104 @@ const GroupTaskDetail: React.FC = () => {
           </div>
         </div>
 
+        {/* Display total completion time */}
+        {task.completionTime && (
+          <div className="mb-4 p-4 bg-white rounded shadow">
+            <div className="text-sm text-gray-500">Total Completion Time</div>
+            <div className="text-xl font-semibold">{task.completionTime}</div>
+          </div>
+        )}
+
+        {/* Display individual completion stages */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-4">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Individual Completion Stages</h2>
+          
+          {/* Show completion times for each assignee */}
+          <div className="space-y-3 mb-6">
+            {task.assignedTo.map((assignment, index) => (
+              <div key={`assignee-${assignment.user._id}-${index}`} className="p-3 border rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">{assignment.user.name}</p>
+                    <p className="text-xs text-gray-600">{assignment.user.email}</p>
+                    <div className="mt-1 flex items-center space-x-4">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        assignment.individualStage === 'done' ? 'bg-green-100 text-green-800' :
+                        assignment.individualStage === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {assignment.individualStage}
+                      </span>
+                      {assignment.approval && (
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          assignment.approval === 'approved' ? 'bg-green-100 text-green-800' :
+                          assignment.approval === 'rejected' ? 'bg-red-100 text-red-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {assignment.approval}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {assignment.completedAt && assignment.assignedAt && (
+                      <div className="text-xs text-green-600">
+                        <div>Completed: {new Date(assignment.completedAt).toLocaleString()}</div>
+                        <div className="font-medium">
+                          Time taken: {(() => {
+                            const start = new Date(assignment.assignedAt);
+                            const end = new Date(assignment.completedAt);
+                            const diffMs = end.getTime() - start.getTime();
+                            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                            
+                            if (diffDays > 0) {
+                              return `${diffDays}d ${diffHours}h ${diffMinutes}m`;
+                            } else if (diffHours > 0) {
+                              return `${diffHours}h ${diffMinutes}m`;
+                            } else {
+                              return `${diffMinutes}m`;
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                    {!assignment.completedAt && (
+                      <div className="text-xs text-gray-500">
+                        {assignment.individualStage === 'pending' ? 'In progress...' : 'Not started'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {assignment.notes && (
+                  <div className="mt-2 p-2 bg-white rounded border text-xs text-gray-600">
+                    <strong>Notes:</strong> {assignment.notes}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Additional completion stages from backend if available */}
+          {task.individualStages && task.individualStages.length > 0 && (
+            <div className="border-t pt-4">
+              <h3 className="text-md font-medium text-gray-700 mb-3">Additional Stage Information</h3>
+              {task.individualStages.map((stage, index) => (
+                <div key={`${stage.userId}-${index}`} className="p-3 border-b last:border-b-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-800"><strong>User:</strong> {stage.userId}</p>
+                      <p className="text-sm text-gray-800"><strong>Stage:</strong> {stage.stage}</p>
+                      <p className="text-sm text-gray-800"><strong>Time Taken:</strong> {stage.timeTaken}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <GroupTaskView task={task} currentUserId={currentUser?._id as string} onTaskUpdate={handleTaskUpdate} />
 
         {/* Remarks Section */}
