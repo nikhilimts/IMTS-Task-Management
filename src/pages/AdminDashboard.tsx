@@ -238,27 +238,23 @@ const AdminDashboard: React.FC = () => {
   }, [userDropdownOpen]);
 
   return (
-    <div className="flex flex-col md:flex-row h-screen font-sans bg-gray-100">
-     
-
-     
-
+    <div className="flex flex-col min-h-screen font-sans bg-gray-100">
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
+      <main className="flex-1 p-2 sm:p-4 md:p-6 overflow-y-auto w-full">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <div className="flex items-center">
-            <button className="md:hidden text-2xl mr-3" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+          <div className="flex items-center w-full sm:w-auto">
+            <button className="sm:hidden text-2xl mr-3" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <FaTimes /> : <FaBars />}
             </button>
-            <h1 className="text-2xl font-semibold text-gray-800">Task Management Dashboard</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Task Management Dashboard</h1>
           </div>
-          <div className="flex space-x-3 items-center ml-auto">
+          <div className="flex flex-wrap space-x-2 sm:space-x-3 items-center ml-auto mt-2 sm:mt-0">
             <button 
               onClick={handleCreateTask}
               className="bg-blue-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-blue-700 transition-colors"
             >
-              <BsFillPlusCircleFill /> <span>Create Task</span>
+              <BsFillPlusCircleFill /> <span className="hidden sm:inline">Create Task</span><span className="sm:hidden">Create</span>
             </button>
             <FaBell className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" />
             <div className="relative user-dropdown">
@@ -284,7 +280,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Progress Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 w-full">
           <ProgressCard 
             percentage={dashboardStats.notStarted.percentage} 
             label={dashboardStats.notStarted.label} 
@@ -306,10 +302,10 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Search and Filter Section - Above Task List */}
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-6 w-full">
           {/* Search Bar */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-white p-2 sm:p-4 rounded-lg shadow-md w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
               <h3 className="text-lg font-medium text-gray-900">Search & Filter Tasks</h3>
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -319,29 +315,31 @@ const AdminDashboard: React.FC = () => {
               </button>
             </div>
             
-            <div className="flex items-center relative">
-              <form onSubmit={handleSearch} className="w-full flex">
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            <div className="flex items-center relative w-full">
+              <form onSubmit={handleSearch} className="w-full flex flex-col sm:flex-row">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-500" />
+                </div>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition-colors"
+                  className="mt-2 sm:mt-0 sm:ml-2 px-4 py-2 bg-blue-600 text-white rounded-md sm:rounded-r-md hover:bg-blue-700 transition-colors"
                 >
                   <FaSearch />
                 </button>
               </form>
-              <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-500" />
             </div>
 
             {/* Filters Panel */}
             {showFilters && (
               <div className="mt-4 pt-4 border-t">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select
@@ -438,7 +436,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Task Table */}
         <div className="bg-white p-4 rounded-lg shadow-md overflow-x-auto">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
             <div className="text-lg font-semibold">
               Tasks ({pagination.totalTasks})
             </div>
@@ -475,7 +473,7 @@ const AdminDashboard: React.FC = () => {
               No tasks found. {searchTerm && `Try adjusting your search term "${searchTerm}".`}
             </div>
           ) : (
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-left text-sm overflow-x-auto">
               <thead>
                 <tr className="border-b">
                   <th className="py-2 px-4 whitespace-nowrap">Type</th>
