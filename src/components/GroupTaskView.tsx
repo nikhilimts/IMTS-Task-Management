@@ -205,11 +205,11 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                   )}
 
                   {/* Edit Button for Current User */}
-                  {isCurrentUser && !isEditing && (
+                  {isCurrentUser && !isEditing && (assignment.individualStage === 'done' ? assignment.approval === 'approved' : true) && (
                     <button
                       onClick={() => setEditingStage(assignment.user._id)}
                       className="p-1 text-gray-500 hover:text-blue-600 transition-colors"
-                      title="Update your stage"
+                      title={assignment.approval === 'approved' ? "Re-edit your approved work" : "Update your stage"}
                     >
                       <FaEdit className="w-3 h-3" />
                     </button>
@@ -228,6 +228,26 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
               {assignment.completedAt && (
                 <div className="mt-1 text-xs text-green-600">
                   ✓ Completed on {new Date(assignment.completedAt).toLocaleDateString()}
+                  {assignment.assignedAt && (
+                    <span className="ml-2">
+                      (Time taken: {(() => {
+                        const start = new Date(assignment.assignedAt);
+                        const end = new Date(assignment.completedAt);
+                        const diffMs = end.getTime() - start.getTime();
+                        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        
+                        if (diffDays > 0) {
+                          return `${diffDays}d ${diffHours}h ${diffMinutes}m`;
+                        } else if (diffHours > 0) {
+                          return `${diffHours}h ${diffMinutes}m`;
+                        } else {
+                          return `${diffMinutes}m`;
+                        }
+                      })()})
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -235,21 +255,28 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
               {task.isGroupTask && (task.createdBy?._id === currentUserId) && assignment.individualStage === 'done' && (
                 <div className="mt-2 flex space-x-2">
                   {assignment.approval !== 'approved' && (
-                    <button
-                      onClick={() => handleApproval(assignment.user._id, 'approve')}
-                      disabled={isUpdating}
-                      className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
-                    >
-                      Approve
-                    </button>
+                    <>
+                      <button
+                        onClick={() => handleApproval(assignment.user._id, 'approve')}
+                        disabled={isUpdating}
+                        className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleApproval(assignment.user._id, 'reject')}
+                        disabled={isUpdating}
+                        className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </>
                   )}
-                  <button
-                    onClick={() => handleApproval(assignment.user._id, 'reject')}
-                    disabled={isUpdating}
-                    className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:opacity-50"
-                  >
-                    Reject
-                  </button>
+                  {assignment.approval === 'approved' && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-green-600">✓ Approved - Can be re-edited for improvements</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -283,6 +310,19 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                   </button>
                 )}
               </>
+            )}
+            {/* Allow re-editing for approved tasks */}
+            {currentUserAssignment.individualStage === 'done' && currentUserAssignment.approval === 'approved' && (
+              <div className="flex flex-col space-y-1">
+                <button
+                  onClick={() => handleIndividualStageUpdate('pending', 'Re-editing approved work for improvements')}
+                  disabled={isUpdating}
+                  className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+                >
+                  Re-edit Work
+                </button>
+                <span className="text-xs text-gray-600">Your work is approved but can be improved</span>
+              </div>
             )}
           </div>
         </div>
