@@ -436,7 +436,7 @@ class TaskService {
    * Get download URL for attachment
    */
   getAttachmentDownloadUrl(taskId: string, attachmentId: string): string {
-    const baseUrl = api.defaults.baseURL || 'http://localhost:5000/api';
+    const baseUrl = api.defaults.baseURL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
     return `${baseUrl}/tasks/${taskId}/attachments/${attachmentId}/download`;
   }
 

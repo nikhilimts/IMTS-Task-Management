@@ -112,7 +112,8 @@ class AuthService {
 
   async getDepartments(): Promise<Department[]> {
     // Call departments endpoint without authentication for signup page
-    const response = await fetch('http://localhost:5000/api/users/departments', {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+    const response = await fetch(`${baseUrl}/users/departments`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
