@@ -99,6 +99,25 @@ const Tasks: React.FC = () => {
     return new Date(deadline) < new Date() && !['completed', 'approved'].includes(status);
   };
 
+  const getApprovalStatus = (task: Task) => {
+    if (!task.isGroupTask) {
+      // For individual tasks, check the overall task status
+      if (task.status === 'approved') return { status: 'Approved', color: 'bg-green-100 text-green-800' };
+      if (task.status === 'rejected') return { status: 'Rejected', color: 'bg-red-100 text-red-800' };
+      return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
+    }
+    
+    // For group tasks, check individual approvals
+    const approved = task.assignedTo.filter(a => a.approval === 'approved').length;
+    const rejected = task.assignedTo.filter(a => a.approval === 'rejected').length;
+    const total = task.assignedTo.length;
+    
+    if (approved === total) return { status: 'All Approved', color: 'bg-green-100 text-green-800' };
+    if (rejected > 0) return { status: `${approved}/${total} App., ${rejected} Rej.`, color: 'bg-yellow-100 text-yellow-800' };
+    if (approved > 0) return { status: `${approved}/${total} Approved`, color: 'bg-blue-100 text-blue-800' };
+    return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
+  };
+
   const handleLogout = async () => {
     try {
       await authService.logout();
@@ -223,7 +242,7 @@ const Tasks: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
                     Task
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -231,6 +250,9 @@ const Tasks: React.FC = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Priority
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Approval Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Assigned To
@@ -246,7 +268,7 @@ const Tasks: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center">
+                    <td colSpan={7} className="px-6 py-4 text-center">
                       <div className="flex justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                       </div>
@@ -254,7 +276,7 @@ const Tasks: React.FC = () => {
                   </tr>
                 ) : tasks.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                       No tasks found
                     </td>
                   </tr>
@@ -288,6 +310,16 @@ const Tasks: React.FC = () => {
                           <FaFlag className="mr-1" />
                           {task.priority}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const approvalInfo = getApprovalStatus(task);
+                          return (
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${approvalInfo.color}`}>
+                              {approvalInfo.status}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col space-y-1">
