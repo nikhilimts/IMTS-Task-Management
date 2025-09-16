@@ -88,6 +88,8 @@ export interface Task {
   completedAt?: string;
   approvedAt?: string;
   approvedBy?: string;
+  completionTime?: string; // Time taken for task completion
+  individualStages: Array<{ userId: string; stage: string; timeTaken: string; }>; // Individual stages for each assignee
 }
 
 export interface CreateTaskData {
