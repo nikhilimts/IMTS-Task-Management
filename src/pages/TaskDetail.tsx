@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
-  FaArrowLeft, FaSave, FaEdit, FaTrash, FaPlus, FaDownload, 
-  FaUsers, FaClock, FaTimes,
-  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye,
-  FaFilePdf, FaImage, FaFile
+  FaArrowLeft, FaSave, FaEdit, FaTrash, FaDownload, FaUsers, FaClock, FaTimes,
+  FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye, FaFilePdf, FaImage, FaFile, FaPlus
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import authService from '../services/authService';
@@ -17,11 +15,6 @@ interface User {
   name: string;
   email: string;
   role: string;
-}
-
-interface Department {
-  _id: string;
-  name: string;
 }
 
 const TaskDetail: React.FC = () => {
@@ -37,7 +30,6 @@ const TaskDetail: React.FC = () => {
   const [loading, setLoading] = useState(!isCreateMode);
   const [saving, setSaving] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const currentUser = authService.getCurrentUser();
 
   // Permission checks based on user role (only for existing tasks)
@@ -79,15 +71,13 @@ const TaskDetail: React.FC = () => {
   const loadInitialData = async () => {
     try {
       // Load users and departments
-      const [usersResponse, departmentsResponse] = await Promise.all([
-        api.get('/users'),
-        authService.getDepartments()
+      const [usersResponse] = await Promise.all([
+        api.get('/users')
       ]);
 
       if (usersResponse.data && usersResponse.data.success) {
         setUsers(usersResponse.data.data || []);
       }
-      setDepartments(departmentsResponse);
 
       // Load task if not in create mode
       if (!isCreateMode && id) {
@@ -129,6 +119,13 @@ const TaskDetail: React.FC = () => {
   useEffect(() => {
     loadInitialData();
   }, [id]);
+
+  // Redirect to group page if task is group
+  useEffect(() => {
+    if (!isCreateMode && task?.isGroupTask && id) {
+      navigate(`/tasks/${id}/group`, { replace: true });
+    }
+  }, [task?.isGroupTask, id, isCreateMode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
