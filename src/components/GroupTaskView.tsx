@@ -234,13 +234,15 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
               {/* Moderator controls: approve/reject */}
               {task.isGroupTask && (task.createdBy?._id === currentUserId) && assignment.individualStage === 'done' && (
                 <div className="mt-2 flex space-x-2">
-                  <button
-                    onClick={() => handleApproval(assignment.user._id, 'approve')}
-                    disabled={isUpdating}
-                    className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
-                  >
-                    Approve
-                  </button>
+                  {assignment.approval !== 'approved' && (
+                    <button
+                      onClick={() => handleApproval(assignment.user._id, 'approve')}
+                      disabled={isUpdating}
+                      className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                    >
+                      Approve
+                    </button>
+                  )}
                   <button
                     onClick={() => handleApproval(assignment.user._id, 'reject')}
                     disabled={isUpdating}
