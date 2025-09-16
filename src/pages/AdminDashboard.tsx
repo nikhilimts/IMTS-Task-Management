@@ -139,6 +139,25 @@ const AdminDashboard: React.FC = () => {
     return Math.round((completedCount / task.assignedTo.length) * 100);
   };
 
+  const getApprovalStatus = (task: TaskType) => {
+    if (!task.isGroupTask) {
+      // For individual tasks, check the overall task status
+      if (task.status === 'approved') return { status: 'Approved', color: 'bg-green-100 text-green-800' };
+      if (task.status === 'rejected') return { status: 'Rejected', color: 'bg-red-100 text-red-800' };
+      return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
+    }
+    
+    // For group tasks, check individual approvals
+    const approved = task.assignedTo.filter(a => a.approval === 'approved').length;
+    const rejected = task.assignedTo.filter(a => a.approval === 'rejected').length;
+    const total = task.assignedTo.length;
+    
+    if (approved === total) return { status: 'All Approved', color: 'bg-green-100 text-green-800' };
+    if (rejected > 0) return { status: `${approved}/${total} Approved, ${rejected} Rejected`, color: 'bg-yellow-100 text-yellow-800' };
+    if (approved > 0) return { status: `${approved}/${total} Approved`, color: 'bg-blue-100 text-blue-800' };
+    return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
+  };
+
 
   // Helper functions
   // Helper functions
@@ -453,10 +472,11 @@ const AdminDashboard: React.FC = () => {
                 <tr className="border-b">
                   <th className="py-2 px-4 whitespace-nowrap">Type</th>
                   <th className="py-2 px-4 whitespace-nowrap">Creator</th>
-                  <th className="py-2 px-4 whitespace-nowrap">Task Title</th>
+                  <th className="py-2 px-4 whitespace-nowrap w-1/4">Task Title</th>
                   <th className="py-2 px-4 whitespace-nowrap">Assigned To</th>
                   <th className="py-2 px-4 whitespace-nowrap">Priority</th>
                   <th className="py-2 px-4 whitespace-nowrap">Stage</th>
+                  <th className="py-2 px-4 whitespace-nowrap">Approval Status</th>
                   <th className="py-2 px-4 whitespace-nowrap">Deadline</th>
                   <th className="py-2 px-4 whitespace-nowrap">Actions</th>
                 </tr>
@@ -537,6 +557,16 @@ const AdminDashboard: React.FC = () => {
                           <span className={`px-2 py-1 rounded-full text-xs ${getStageColor(task.stage)}`}>
                             {task.stage.charAt(0).toUpperCase() + task.stage.slice(1)}
                           </span>
+                        </td>
+                        <td className="py-2 px-4">
+                          {(() => {
+                            const approvalInfo = getApprovalStatus(task);
+                            return (
+                              <span className={`px-2 py-1 rounded-full text-xs ${approvalInfo.color}`}>
+                                {approvalInfo.status}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="py-2 px-4">
                           <div className="text-xs">
