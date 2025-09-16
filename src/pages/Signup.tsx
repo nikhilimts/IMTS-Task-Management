@@ -103,14 +103,15 @@ const Signup: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md border border-gray-200"
-        >
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Sign Up
-        </h2>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-2 sm:px-4">
+        <div className="w-full max-w-md">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-4 sm:p-8 md:p-10 rounded-xl shadow-lg w-full border border-gray-200"
+          >
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
+            Sign Up
+          </h2>
 
         <div className="mb-5">
           <label htmlFor="name" className="block mb-1 text-sm font-medium text-gray-700">
@@ -288,16 +289,19 @@ const Signup: React.FC = () => {
             'Create Account'
           )}
           </button>
-        </form>
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
-              Sign in here
-            </Link>
-          </p>
+          </form>
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{' '}
+              <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+                Sign in here
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </>
   );
-};export default Signup;
+};
+
+export default Signup;
