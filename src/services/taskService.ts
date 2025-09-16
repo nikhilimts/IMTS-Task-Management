@@ -6,8 +6,8 @@ export interface Task {
   description: string;
   deadline: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred';
-  stage: 'planning' | 'development' | 'testing' | 'review' | 'deployment' | 'completed';
+  status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred' | 'pending';
+  stage: 'planning' | 'pending' | 'done';
   isGroupTask: boolean;
   createdBy: {
     _id: string;
@@ -198,12 +198,12 @@ export interface AssignTaskData {
 }
 
 export interface UpdateStatusData {
-  status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred';
+  status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred' | 'pending';
   reason?: string;
 }
 
 export interface UpdateStageData {
-  stage: 'planning' | 'development' | 'testing' | 'review' | 'deployment' | 'completed';
+  stage: 'planning' | 'pending' | 'done';
   reason?: string;
 }
 
