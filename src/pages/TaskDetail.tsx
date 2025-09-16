@@ -354,9 +354,13 @@ const TaskDetail: React.FC = () => {
   const getStatusColor = (status: string) => {
     const colors = {
       created: 'bg-gray-100 text-gray-800',
+      assigned: 'bg-blue-100 text-blue-800',
+      in_progress: 'bg-yellow-100 text-yellow-800',
+      completed: 'bg-green-100 text-green-800',
       approved: 'bg-green-200 text-green-900',
       rejected: 'bg-red-100 text-red-800',
       transferred: 'bg-purple-100 text-purple-800',
+      pending: 'bg-yellow-100 text-yellow-800',
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -628,14 +632,13 @@ const TaskDetail: React.FC = () => {
                     </label>
                     {canUpdateStatus ? (
                       <select
-                        value={task.status}
+                        value={task.status === 'approved' || task.status === 'rejected' ? task.status : 'pending'}
                         onChange={(e) => handleStatusChange(e.target.value)}
                         className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${getStatusColor(task.status)}`}
                       >
-                        <option value="created">Created</option>
+                        <option value="pending">Pending Review</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
-                        <option value="transferred">Transferred</option>
                       </select>
                     ) : (
                       <div className={`w-full px-3 py-2 border border-gray-200 rounded-md ${getStatusColor(task.status)} opacity-75 cursor-not-allowed`}>
@@ -643,6 +646,36 @@ const TaskDetail: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Completion Notice waiting for approval */}
+                  {task.stage === 'done' && !['approved', 'rejected'].includes(task.status) && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 1.414L10.586 9.5 9.293 10.793a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+                        </svg>
+                        <div className="text-sm">
+                          <p className="text-blue-800 font-medium">Task Completed - Awaiting Review</p>
+                          <p className="text-blue-700">The assignee has marked this task as done. Creator can now approve or reject.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rejection Notice for Rework */}
+                  {task.status === 'rejected' && (isCreator || isAssignee) && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <div className="text-sm">
+                          <p className="text-red-800 font-medium">Task Rejected</p>
+                          <p className="text-red-700">The stage has been reset to "Pending". Please rework and mark as "Done" again.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
