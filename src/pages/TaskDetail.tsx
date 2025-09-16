@@ -435,12 +435,12 @@ const TaskDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Task Information</h2>
               
               <div className="space-y-4">
@@ -480,7 +480,7 @@ const TaskDetail: React.FC = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Priority *
@@ -568,10 +568,10 @@ const TaskDetail: React.FC = () => {
 
             {/* Status and Stage Management (only for existing tasks) */}
             {!isCreateMode && task && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Status & Progress</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Status
@@ -654,7 +654,7 @@ const TaskDetail: React.FC = () => {
             )}
 
             {/* Attachments */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Attachments</h2>
               
               {/* File Upload */}
@@ -667,7 +667,7 @@ const TaskDetail: React.FC = () => {
                   id="file-upload"
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
                 />
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
                   <label
                     htmlFor="file-upload"
                     className="cursor-pointer px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -706,7 +706,7 @@ const TaskDetail: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                         {isViewable(attachment.originalName) && (
                           <button
                             onClick={() => handleViewFile(task._id, attachment._id)}
@@ -741,7 +741,7 @@ const TaskDetail: React.FC = () => {
 
             {/* Remarks Section (only for existing tasks) */}
             {!isCreateMode && task && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Remarks & Comments</h2>
                 
                 {/* Add New Remark */}
@@ -847,7 +847,7 @@ const TaskDetail: React.FC = () => {
           <div className="space-y-6">
             {/* Task Details */}
             {!isCreateMode && task && (
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Details</h2>
                 
                 <div className="space-y-3">
@@ -891,7 +891,7 @@ const TaskDetail: React.FC = () => {
             )}
 
             {/* Assigned Users */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 <FaUsers className="inline mr-2" />
                 Assigned Users
