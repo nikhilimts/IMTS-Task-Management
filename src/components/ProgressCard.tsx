@@ -53,14 +53,14 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, count, c
 
   return (
     <div
-      className="p-6 rounded-xl shadow-md w-full max-w-[220px] flex flex-col items-center relative"
+      className="p-4 sm:p-6 rounded-xl shadow-md w-full max-w-[200px] sm:max-w-[220px] flex flex-col items-center relative"
       style={{ backgroundColor }}
     >
       <svg
         width={containerWidth}
-        height="120"
-        viewBox={`0 0 ${containerWidth} 120`}
-        className="mb-2"
+        height="100"
+        viewBox={`0 0 ${containerWidth} 100`}
+        className="mb-2 sm:h-[120px]"
       >
         {/* Background 3/4 circle */}
         <circle
@@ -94,10 +94,11 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, count, c
           x={cx}
           y={count !== undefined ? 60 : 65}
           textAnchor="middle"
-          fontSize="28"
+          fontSize="24"
           fontWeight="bold"
           fill={strokeColor}
           dominantBaseline="middle"
+          className="sm:text-[28px]"
         >
           {percentage}%
         </text>
@@ -108,10 +109,11 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, count, c
             x={cx}
             y={80}
             textAnchor="middle"
-            fontSize="14"
+            fontSize="12"
             fontWeight="500"
             fill="#6b7280"
             dominantBaseline="middle"
+            className="sm:text-[14px]"
           >
             ({count} tasks)
           </text>
@@ -122,10 +124,11 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ percentage, label, count, c
           x={cx}
           y={count !== undefined ? 95 : 90}
           textAnchor="middle"
-          fontSize="16"
+          fontSize="14"
           fontWeight="600"
           fill={strokeColor}
           dominantBaseline="middle"
+          className="sm:text-[16px]"
         >
           {label}
         </text>
