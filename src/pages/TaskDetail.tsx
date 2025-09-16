@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
-  FaArrowLeft, FaSave, FaEdit, FaTrash, FaDownload, FaUsers, FaClock, FaTimes,
+  FaArrowLeft, FaSave, FaDownload, FaUsers, FaClock, FaTimes,
   FaFileUpload, FaCalendarAlt, FaUser, FaBuilding, FaEye, FaFilePdf, FaImage, FaFile, FaPlus
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import authService from '../services/authService';
 import api from '../services/api';
-import type { Task, CreateTaskData, UpdateTaskData, RemarkData } from '../services/taskService';
+import type { Task, CreateTaskData, RemarkData } from '../services/taskService';
 
 interface User {
   _id: string;
@@ -26,7 +26,6 @@ const TaskDetail: React.FC = () => {
   
   // States
   const [task, setTask] = useState<Task | null>(null);
-  const [editMode, setEditMode] = useState(isCreateMode);
   const [loading, setLoading] = useState(!isCreateMode);
   const [saving, setSaving] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -52,9 +51,7 @@ const TaskDetail: React.FC = () => {
   // Debug logging
   console.log('Create mode debug:', {
     isCreateMode,
-    editMode,
-    formDataTitle: formData.title,
-    canEdit: editMode || isCreateMode
+    formDataTitle: formData.title
   });
 
   // Remark states
@@ -156,43 +153,39 @@ const TaskDetail: React.FC = () => {
     try {
       setSaving(true);
 
-      if (!formData.title.trim()) {
-        toast.error('Task title is required');
-        return;
-      }
-
-      if (!formData.description.trim()) {
-        toast.error('Task description is required');
-        return;
-      }
-
       if (!formData.deadline) {
         toast.error('Task deadline is required');
         return;
       }
 
       if (isCreateMode) {
+        if (!formData.title.trim()) {
+          toast.error('Task title is required');
+          return;
+        }
+
+        if (!formData.description.trim()) {
+          toast.error('Task description is required');
+          return;
+        }
+
         const response = await taskService.createTask(formData);
         if (response.success) {
           toast.success('Task created successfully');
           navigate(`/tasks/${response.data.task._id}`);
         }
-      } else if (id) {
-        const updateData: UpdateTaskData = {
-          title: formData.title,
-          description: formData.description,
-          deadline: formData.deadline,
-          priority: formData.priority,
-          tags: formData.tags,
-          attachments: formData.attachments
-        };
-        const response = await taskService.updateTask(id, updateData);
+      } else if (id && isCreator) {
+        // For existing tasks, only allow deadline updates by creators
+        const response = await taskService.updateTask(id, {
+          deadline: formData.deadline
+        });
         if (response.success) {
-          toast.success('Task updated successfully');
+          toast.success('Task deadline updated successfully');
           setTask(response.data.task);
-          setEditMode(false);
           loadInitialData();
         }
+      } else {
+        toast.error('You do not have permission to update this task');
       }
     } catch (error: any) {
       console.error('Save error:', error);
@@ -241,9 +234,22 @@ const TaskDetail: React.FC = () => {
 
     try {
       setAddingRemark(true);
+      
+      // Determine the actual category when 'auto' is selected
+      let actualCategory = remarkCategory;
+      if (remarkCategory === 'auto') {
+        if (isCreator) {
+          actualCategory = 'creator';
+        } else if (isAssignee) {
+          actualCategory = 'assignee';
+        } else {
+          actualCategory = 'general';
+        }
+      }
+      
       const remarkData: RemarkData = {
         text: newRemark,
-        category: remarkCategory
+        category: actualCategory
       };
       
       const response = await taskService.addRemark(id, remarkData);
@@ -337,20 +343,6 @@ const TaskDetail: React.FC = () => {
     }
   };
 
-  const handleDeleteTask = async () => {
-    if (!id || !confirm('Are you sure you want to delete this task?')) return;
-
-    try {
-      const response = await taskService.deleteTask(id);
-      if (response.success) {
-        toast.success('Task deleted successfully');
-        navigate('/dashboard');
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to delete task');
-    }
-  };
-
   const getStatusColor = (status: string) => {
     const colors = {
       created: 'bg-gray-100 text-gray-800',
@@ -436,53 +428,9 @@ const TaskDetail: React.FC = () => {
             
             <div className="flex items-center space-x-3">
               {!isCreateMode && (
-                <>
-                  {editMode ? (
-                    <>
-                      <button
-                        onClick={() => setEditMode(false)}
-                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                      >
-                        <FaTimes className="mr-2" />
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        <FaSave className="mr-2" />
-                        {saving ? 'Saving...' : 'Save Changes'}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {isCreator && (
-                        <>
-                          <button
-                            onClick={() => setEditMode(true)}
-                            className="px-4 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50"
-                          >
-                            <FaEdit className="mr-2" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={handleDeleteTask}
-                            className="px-4 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
-                          >
-                            <FaTrash className="mr-2" />
-                            Delete
-                          </button>
-                        </>
-                      )}
-                      {!isCreator && (
-                        <div className="text-sm text-gray-500">
-                          Only the task creator can edit task details
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
+                <div className="text-sm text-gray-500">
+                  View task details
+                </div>
               )}
               
               {isCreateMode && (
@@ -513,7 +461,7 @@ const TaskDetail: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Title *
                   </label>
-                  {editMode || isCreateMode ? (
+                  {isCreateMode ? (
                     <input
                       type="text"
                       name="title"
@@ -531,7 +479,7 @@ const TaskDetail: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description *
                   </label>
-                  {editMode || isCreateMode ? (
+                  {isCreateMode ? (
                     <textarea
                       name="description"
                       value={formData.description}
@@ -550,7 +498,7 @@ const TaskDetail: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Priority *
                     </label>
-                    {editMode || isCreateMode ? (
+                    {isCreateMode ? (
                       <select
                         name="priority"
                         value={formData.priority}
@@ -571,16 +519,40 @@ const TaskDetail: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Deadline *
+                      Deadline * {!isCreateMode && isCreator && (
+                        <span className="text-xs text-blue-600">(You can edit this)</span>
+                      )}
                     </label>
-                    {editMode || isCreateMode ? (
-                      <input
-                        type="datetime-local"
-                        name="deadline"
-                        value={formData.deadline}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                    
+                    {/* Debug info - remove this after testing */}
+                    <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+                      Debug info: isCreateMode={isCreateMode ? 'true' : 'false'}, 
+                      isCreator={isCreator ? 'true' : 'false'}, 
+                      isAssignee={isAssignee ? 'true' : 'false'}, 
+                      currentUserId={currentUser?._id || 'not loaded'}, 
+                      taskCreatorId={task?.createdBy?._id || 'not loaded'},
+                      assignedUsers={task?.assignedTo?.map(a => a.user._id).join(', ') || 'none'}
+                    </div>
+                    
+                    {(isCreateMode || isCreator) ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="datetime-local"
+                          name="deadline"
+                          value={formData.deadline}
+                          onChange={handleInputChange}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {!isCreateMode && isCreator && (
+                          <button
+                            onClick={handleSave}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                          >
+                            <FaSave />
+                            Save
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <p className="text-gray-900">
                         {task?.deadline ? new Date(task.deadline).toLocaleString() : 'Not set'}
@@ -593,7 +565,7 @@ const TaskDetail: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tags
                   </label>
-                  {editMode || isCreateMode ? (
+                  {isCreateMode ? (
                     <input
                       type="text"
                       value={formData.tags?.join(', ') || ''}
@@ -812,7 +784,9 @@ const TaskDetail: React.FC = () => {
                           onChange={(e) => setRemarkCategory(e.target.value as any)}
                           className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="auto">Auto Category</option>
+                          <option value="auto">
+                            Auto ({isCreator ? 'Creator' : isAssignee ? 'Assignee' : 'General'})
+                          </option>
                           <option value="general">General</option>
                           <option value="creator">Creator</option>
                           <option value="assignee">Assignee</option>
@@ -958,7 +932,7 @@ const TaskDetail: React.FC = () => {
                 Assigned Users
               </h2>
               
-              {editMode || isCreateMode ? (
+              {isCreateMode ? (
                 <div className="space-y-4">
                   {/* Search Input */}
                   <div className="relative">
