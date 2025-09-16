@@ -66,7 +66,12 @@ const CreateTask: React.FC = () => {
     try {
       const response = await userService.getUsersForDropdown();
       if (response.success) {
-        setAvailableUsers(response.data.users);
+        const currentUser = authService.getCurrentUser();
+        // Filter out the current user from the available users list
+        const filteredUsers = response.data.users.filter((user: any) => 
+          !currentUser || user._id !== currentUser._id
+        );
+        setAvailableUsers(filteredUsers);
       }
     } catch (error) {
       console.error('Failed to load users:', error);

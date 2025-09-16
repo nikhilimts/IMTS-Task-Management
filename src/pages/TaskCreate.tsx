@@ -5,6 +5,7 @@ import {
   FaArrowLeft, FaSave, FaTimes, FaUser, FaBuilding, FaSearch
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
+import authService from '../services/authService';
 import api from '../services/api';
 import type { CreateTaskData } from '../services/taskService';
 
@@ -60,9 +61,12 @@ const TaskCreate: React.FC = () => {
   // Filter users based on search
   useEffect(() => {
     if (userSearch.trim()) {
-      const filtered = users.filter(user =>
-        user.searchableText.toLowerCase().includes(userSearch.toLowerCase())
-      );
+      const currentUser = authService.getCurrentUser();
+      const filtered = users.filter(user => {
+        // Exclude current user from the dropdown
+        const isCurrentUser = currentUser && user._id === currentUser._id;
+        return !isCurrentUser && user.searchableText.toLowerCase().includes(userSearch.toLowerCase());
+      });
       setFilteredUsers(filtered.slice(0, 10)); // Limit to 10 results
     } else {
       setFilteredUsers([]);
