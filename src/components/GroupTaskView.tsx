@@ -16,7 +16,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case 'planning':
+      case 'not_started':
         return 'bg-gray-100 text-gray-800 border-gray-300';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
@@ -44,7 +44,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
 
   const getStageIcon = (stage: string) => {
     switch (stage) {
-      case 'planning':
+      case 'not_started':
         return <FaClock className="w-4 h-4" />;
       case 'pending':
         return <FaExclamationTriangle className="w-4 h-4" />;
@@ -60,7 +60,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
       setIsUpdating(true);
       
       const updateData = {
-        stage: newStage as 'planning' | 'pending' | 'done',
+        stage: newStage as 'not_started' | 'pending' | 'done',
         status: newStage === 'done' ? 'completed' as const : 'in_progress' as const,
         notes: notes || ''
       };
@@ -191,7 +191,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                       onChange={(e) => handleIndividualStageUpdate(e.target.value)}
                       disabled={isUpdating}
                     >
-                      <option value="planning">Planning</option>
+                      <option value="not_started">Not Started</option>
                       <option value="pending">Pending</option>
                       <option value="done">Done</option>
                     </select>
@@ -291,7 +291,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
           <div className="flex space-x-2">
             {currentUserAssignment.individualStage !== 'done' && (
               <>
-                {currentUserAssignment.individualStage === 'planning' && (
+                {currentUserAssignment.individualStage === 'not_started' && (
                   <button
                     onClick={() => handleIndividualStageUpdate('pending')}
                     disabled={isUpdating}
