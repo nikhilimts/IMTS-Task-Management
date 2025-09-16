@@ -98,6 +98,21 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
   const currentUserAssignment = getCurrentUserAssignment();
   const progress = calculateProgress();
 
+  const handleApproval = async (userId: string, decision: 'approve' | 'reject') => {
+    try {
+      setIsUpdating(true);
+      const res = await taskService.updateIndividualApproval(task._id, { userId, decision });
+      if (res.success) {
+        toast.success(decision === 'approve' ? 'Approved' : 'Rejected');
+        onTaskUpdate?.(res.data.task);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update approval');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       {/* Group Task Header */}
@@ -161,6 +176,13 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                     {assignment.status.replace('_', ' ')}
                   </span>
 
+                  {/* Approval badge */}
+                  {assignment.approval && (
+                    <span className={`px-2 py-1 rounded-full text-xs ${assignment.approval === 'approved' ? 'bg-green-100 text-green-800' : assignment.approval === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {assignment.approval}
+                    </span>
+                  )}
+
                   {/* Individual Stage */}
                   {isEditing ? (
                     <select
@@ -206,6 +228,26 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
               {assignment.completedAt && (
                 <div className="mt-1 text-xs text-green-600">
                   ✓ Completed on {new Date(assignment.completedAt).toLocaleDateString()}
+                </div>
+              )}
+
+              {/* Moderator controls: approve/reject */}
+              {task.isGroupTask && (task.createdBy?._id === currentUserId) && assignment.individualStage === 'done' && (
+                <div className="mt-2 flex space-x-2">
+                  <button
+                    onClick={() => handleApproval(assignment.user._id, 'approve')}
+                    disabled={isUpdating}
+                    className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleApproval(assignment.user._id, 'reject')}
+                    disabled={isUpdating}
+                    className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
                 </div>
               )}
             </div>
