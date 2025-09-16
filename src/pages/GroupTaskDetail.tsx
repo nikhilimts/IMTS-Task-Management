@@ -14,8 +14,25 @@ const GroupTaskDetail: React.FC = () => {
 
   // Remark states
   const [newRemark, setNewRemark] = useState('');
-  const [remarkCategory, setRemarkCategory] = useState<'creator' | 'assignee' | 'general' | 'auto'>('general');
   const [addingRemark, setAddingRemark] = useState(false);
+
+  // Auto-determine remark category based on user role
+  const getRemarkCategory = (): 'creator' | 'assignee' | 'general' => {
+    if (!currentUser || !task) return 'general';
+    
+    // If current user is the task creator
+    if (task.createdBy._id === currentUser._id) {
+      return 'creator';
+    }
+    
+    // If current user is an assignee
+    if (task.assignedTo.some(assignment => assignment.user._id === currentUser._id)) {
+      return 'assignee';
+    }
+    
+    // Otherwise general
+    return 'general';
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -45,9 +62,10 @@ const GroupTaskDetail: React.FC = () => {
 
     try {
       setAddingRemark(true);
+      const category = getRemarkCategory();
       const remarkData = {
         text: newRemark,
-        category: remarkCategory
+        category
       };
 
       const response = await taskService.addRemark(id, remarkData);
@@ -118,25 +136,13 @@ const GroupTaskDetail: React.FC = () => {
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={3}
               />
-              <div className="flex flex-col space-y-2">
-                <select
-                  value={remarkCategory}
-                  onChange={(e) => setRemarkCategory(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="general">General</option>
-                  <option value="creator">Creator</option>
-                  <option value="assignee">Assignee</option>
-                  <option value="auto">Auto</option>
-                </select>
-                <button
-                  onClick={handleAddRemark}
-                  disabled={!newRemark.trim() || addingRemark}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {addingRemark ? 'Adding...' : 'Add Remark'}
-                </button>
-              </div>
+              <button
+                onClick={handleAddRemark}
+                disabled={!newRemark.trim() || addingRemark}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              >
+                {addingRemark ? 'Adding...' : 'Add Remark'}
+              </button>
             </div>
           </div>
 
@@ -161,10 +167,10 @@ const GroupTaskDetail: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <span className="font-medium text-gray-800">{remark.author.name}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          remark.category === 'creator' ? 'bg-blue-100 text-blue-800' :
-                          remark.category === 'assignee' ? 'bg-green-100 text-green-800' :
-                          'bg-gray-100 text-gray-800'
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          remark.category === 'creator' ? 'bg-blue-500 text-white' :
+                          remark.category === 'assignee' ? 'bg-emerald-500 text-white' :
+                          'bg-slate-500 text-white'
                         }`}>
                           {remark.category}
                         </span>
