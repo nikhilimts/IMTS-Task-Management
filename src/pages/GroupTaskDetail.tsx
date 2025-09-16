@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FaSave } from 'react-icons/fa';
 import authService from '../services/authService';
 import taskService, { type Task } from '../services/taskService';
 import GroupTaskView from '../components/GroupTaskView';
@@ -10,7 +11,17 @@ const GroupTaskDetail: React.FC = () => {
   const navigate = useNavigate();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const currentUser = authService.getCurrentUser();
+
+  // Form data for deadline editing
+  const [formData, setFormData] = useState({
+    deadline: ''
+  });
+
+  // Check if current user is creator
+  const isCreator = task?.createdBy?._id === currentUser?._id;
+  const isAssignee = task?.assignedTo?.some(assignment => assignment.user._id === currentUser?._id);
 
   // Remark states
   const [newRemark, setNewRemark] = useState('');
@@ -35,6 +46,50 @@ const GroupTaskDetail: React.FC = () => {
     return 'general';
   };
 
+  // Handle deadline update for creators
+  const handleSave = async () => {
+    if (!task || !isCreator || !id) {
+      toast.error('You do not have permission to update this task');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      if (!formData.deadline) {
+        toast.error('Task deadline is required');
+        return;
+      }
+
+      const response = await taskService.updateTask(id, {
+        deadline: formData.deadline
+      });
+      
+      if (response.success) {
+        toast.success('Task deadline updated successfully');
+        setTask(response.data.task);
+        // Update form data with the new deadline
+        setFormData({
+          deadline: new Date(response.data.task.deadline).toISOString().slice(0, 16)
+        });
+      }
+    } catch (error: any) {
+      console.error('Save error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update task deadline');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   useEffect(() => {
     const load = async () => {
       if (!id) return;
@@ -46,6 +101,10 @@ const GroupTaskDetail: React.FC = () => {
             return;
           }
           setTask(res.data.task);
+          // Set form data for deadline editing
+          setFormData({
+            deadline: new Date(res.data.task.deadline).toISOString().slice(0, 16)
+          });
         }
       } catch (e: any) {
         toast.error(e.response?.data?.message || 'Failed to load task');
@@ -106,9 +165,48 @@ const GroupTaskDetail: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-semibold text-gray-800">{task.title}</h1>
-            <p className="text-sm text-gray-500">Deadline: {new Date(task.deadline).toLocaleString()}</p>
+            
+            {/* Deadline Section with Editing for Creators */}
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Deadline {isCreator && (
+                  <span className="text-xs text-blue-600">(You can edit this)</span>
+                )}
+              </label>
+              
+              {/* Debug info - remove this after testing */}
+              <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
+                Debug info: isCreator={isCreator ? 'true' : 'false'}, 
+                isAssignee={isAssignee ? 'true' : 'false'}, 
+                currentUserId={currentUser?._id || 'not loaded'}, 
+                taskCreatorId={task?.createdBy?._id || 'not loaded'},
+                assignedUsers={task?.assignedTo?.map(a => a.user._id).join(', ') || 'none'}
+              </div>
+              
+              {isCreator ? (
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="datetime-local"
+                    name="deadline"
+                    value={formData.deadline}
+                    onChange={handleInputChange}
+                    className="flex-1 max-w-xs px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1 text-sm"
+                  >
+                    <FaSave className="text-xs" />
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600">{new Date(task.deadline).toLocaleString()}</p>
+              )}
+            </div>
           </div>
           <button onClick={() => navigate('/dashboard')} className="px-3 py-1 bg-gray-200 rounded text-sm">Back</button>
         </div>
@@ -272,7 +370,9 @@ const GroupTaskDetail: React.FC = () => {
                     onChange={(e) => setRemarkCategory(e.target.value as any)}
                     className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="auto">Auto Category</option>
+                    <option value="auto">
+                      Auto ({isCreator ? 'Creator' : isAssignee ? 'Assignee' : 'General'})
+                    </option>
                     <option value="general">General</option>
                     <option value="creator">Creator</option>
                     <option value="assignee">Assignee</option>
