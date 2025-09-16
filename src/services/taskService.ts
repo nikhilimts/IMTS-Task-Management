@@ -7,7 +7,7 @@ export interface Task {
   deadline: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'created' | 'assigned' | 'in_progress' | 'completed' | 'approved' | 'rejected' | 'transferred' | 'pending';
-  stage: 'planning' | 'pending' | 'done';
+  stage: 'not_started' | 'pending' | 'done';
   isGroupTask: boolean;
   createdBy: {
     _id: string;
@@ -24,7 +24,7 @@ export interface Task {
     };
     assignedAt: string;
     status: string;
-    individualStage: 'planning' | 'pending' | 'done';
+    individualStage: 'not_started' | 'pending' | 'done';
     completedAt?: string;
     notes?: string;
     approval?: 'pending' | 'approved' | 'rejected';
@@ -203,12 +203,12 @@ export interface UpdateStatusData {
 }
 
 export interface UpdateStageData {
-  stage: 'planning' | 'pending' | 'done';
+  stage: 'not_started' | 'pending' | 'done';
   reason?: string;
 }
 
 export interface UpdateIndividualStageData {
-  stage?: 'planning' | 'pending' | 'done';
+  stage?: 'not_started' | 'pending' | 'done';
   status?: 'assigned' | 'in_progress' | 'completed' | 'blocked';
   notes?: string;
 }
