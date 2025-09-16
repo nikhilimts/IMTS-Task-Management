@@ -393,10 +393,7 @@ const TaskDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Debug Info */}
-      <div className="fixed top-0 left-0 bg-black text-white p-2 text-xs z-50">
-        Debug: loading={loading.toString()}, isCreateMode={isCreateMode.toString()}, taskExists={!!task}, taskId={id}
-      </div>
+    
       
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
