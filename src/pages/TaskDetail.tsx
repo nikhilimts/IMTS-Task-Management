@@ -524,16 +524,6 @@ const TaskDetail: React.FC = () => {
                       )}
                     </label>
                     
-                    {/* Debug info - remove this after testing */}
-                    <div className="text-xs text-gray-500 mb-2 p-2 bg-gray-100 rounded">
-                      Debug info: isCreateMode={isCreateMode ? 'true' : 'false'}, 
-                      isCreator={isCreator ? 'true' : 'false'}, 
-                      isAssignee={isAssignee ? 'true' : 'false'}, 
-                      currentUserId={currentUser?._id || 'not loaded'}, 
-                      taskCreatorId={task?.createdBy?._id || 'not loaded'},
-                      assignedUsers={task?.assignedTo?.map(a => a.user._id).join(', ') || 'none'}
-                    </div>
-                    
                     {(isCreateMode || isCreator) ? (
                       <div className="flex gap-2">
                         <input
