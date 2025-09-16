@@ -5,6 +5,7 @@ import { FaPlus, FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-i
 import taskService from '../services/taskService';
 import type { Task, TaskFilters } from '../services/taskService';
 import authService from '../services/authService';
+import NotificationBell from '../components/NotificationBell';
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
@@ -163,6 +164,7 @@ const Tasks: React.FC = () => {
                 <FaPlus />
                 <span>Create Task</span>
               </button>
+              <NotificationBell />
               <div className="relative group">
                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
                   <FaUser className="text-gray-600" />
