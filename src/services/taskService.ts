@@ -27,6 +27,10 @@ export interface Task {
     individualStage: 'planning' | 'pending' | 'done';
     completedAt?: string;
     notes?: string;
+    approval?: 'pending' | 'approved' | 'rejected';
+    approvalAt?: string;
+    approvedBy?: { _id: string; name?: string } | string;
+    rejectionReason?: string;
   }>;
   department: {
     _id: string;
@@ -207,6 +211,12 @@ export interface UpdateIndividualStageData {
   notes?: string;
 }
 
+export interface UpdateIndividualApprovalData {
+  userId: string;
+  decision: 'approve' | 'reject';
+  reason?: string;
+}
+
 class TaskService {
   /**
    * Create a new task
@@ -251,8 +261,7 @@ class TaskService {
         deadline: taskData.deadline,
         priority: taskData.priority,
         assignedTo: taskData.assignedTo || [],
-        tags: taskData.tags || [],
-        isGroupTask: taskData.isGroupTask !== undefined ? taskData.isGroupTask : false
+        tags: taskData.tags || []
       });
       return response.data;
     }
@@ -457,6 +466,14 @@ class TaskService {
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Approve or reject an individual assignee in a group task
+   */
+  async updateIndividualApproval(id: string, data: UpdateIndividualApprovalData): Promise<TaskResponse> {
+    const response = await api.put(`/tasks/${id}/individual-approval`, data);
+    return response.data;
   }
 }
 
