@@ -519,7 +519,9 @@ const AdminDashboard: React.FC = () => {
                         <td className="py-2 px-4">
                           <div>
                             <div className="font-medium">{task.title}</div>
-                        
+                            <div className="text-xs text-gray-500 truncate max-w-xs">
+                              {task.description}
+                            </div>
                           </div>
                         </td>
                         <td className="py-2 px-4">
