@@ -200,7 +200,7 @@ const TaskCreate: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate('/tasks')}
+                onClick={() => navigate('/dashboard')}
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Back to Tasks"
               >
