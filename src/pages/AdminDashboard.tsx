@@ -281,7 +281,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Progress Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 w-full">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 w-full">
           <ProgressCard 
             percentage={dashboardStats.notStarted.percentage} 
             label={dashboardStats.notStarted.label} 
@@ -300,7 +300,7 @@ const AdminDashboard: React.FC = () => {
             count={dashboardStats.done.count}
             color="#059669" 
           />
-        </div>
+        </div> */}
 
         {/* Search and Filter Section - Above Task List */}
         <div className="space-y-4 mb-6 w-full">
