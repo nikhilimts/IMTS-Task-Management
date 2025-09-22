@@ -10,6 +10,8 @@ import type { Task as TaskType, TaskFilters } from '../services/taskService';
 import ProgressCard from '../components/ProgressCard';
 import NotificationBell from '../components/NotificationBell';
 import GroupTaskView from '../components/GroupTaskView';
+import OverviewerTasksTable from '../components/OverviewerTasksTable';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // interface TaskStats {
 //   total: number;
@@ -279,6 +281,15 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Overviewer Tasks Section */}
+        <ErrorBoundary fallback={
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p className="text-yellow-800 text-sm">Unable to load overviewer tasks section.</p>
+          </div>
+        }>
+          <OverviewerTasksTable className="mb-6" />
+        </ErrorBoundary>
 
         {/* Progress Cards */}
         {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 w-full">
