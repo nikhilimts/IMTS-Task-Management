@@ -6,7 +6,6 @@ import {
   FaCalendarAlt, FaUser, FaBuilding, FaFilePdf, FaImage, FaFile
 } from 'react-icons/fa';
 import taskService from '../services/taskService';
-import authService from '../services/authService';
 import api from '../services/api';
 import type { Task } from '../services/taskService';
 import NotificationBell from '../components/NotificationBell';
@@ -18,7 +17,6 @@ const OverviewerTaskDetail: React.FC = () => {
   // States
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
-  const currentUser = authService.getCurrentUser();
 
   useEffect(() => {
     loadTask();
@@ -33,18 +31,6 @@ const OverviewerTaskDetail: React.FC = () => {
       
       if (response && response.success && response.data && response.data.task) {
         const taskData = response.data.task;
-        
-        // Verify that the current user is actually an overviewer for this task
-        const isOverviewer = taskData.overviewers?.some((overviewer: any) => 
-          overviewer.user._id === currentUser?._id
-        );
-        
-        if (!isOverviewer) {
-          toast.error('You do not have permission to view this task');
-          navigate('/dashboard');
-          return;
-        }
-        
         setTask(taskData);
       } else {
         toast.error('Task not found');
