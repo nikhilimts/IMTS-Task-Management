@@ -10,6 +10,7 @@ import TaskDetail from './pages/TaskDetail';
 import TaskCreate from './pages/TaskCreate';
 import Tasks from './pages/Tasks';
 import GroupTaskDetail from './pages/GroupTaskDetail';
+import OverviewerTaskDetail from './pages/OverviewerTaskDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
@@ -95,6 +96,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TaskDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tasks/:id/overview"
+          element={
+            <ProtectedRoute>
+              <OverviewerTaskDetail />
             </ProtectedRoute>
           }
         />
