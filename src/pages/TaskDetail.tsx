@@ -10,6 +10,7 @@ import authService from '../services/authService';
 import api from '../services/api';
 import type { Task, CreateTaskData, RemarkData } from '../services/taskService';
 import NotificationBell from '../components/NotificationBell';
+import OverviewerManagement from '../components/OverviewerManagement';
 
 interface User {
   _id: string;
@@ -1018,6 +1019,16 @@ const TaskDetail: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Overviewer Management - Only show for existing tasks */}
+            {!isCreateMode && task && currentUser && (
+              <OverviewerManagement 
+                task={task}
+                onTaskUpdate={setTask}
+                currentUserId={currentUser._id}
+                canManageOverviewers={isCreator || currentUser.role === 'admin'}
+              />
+            )}
           </div>
         </div>
       </div>
