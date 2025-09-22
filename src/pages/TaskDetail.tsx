@@ -1021,12 +1021,9 @@ const TaskDetail: React.FC = () => {
             </div>
 
             {/* Overviewer Management - Only show for existing tasks */}
-            {!isCreateMode && task && currentUser && (
+            {!isCreateMode && task && (
               <OverviewerManagement 
                 task={task}
-                onTaskUpdate={setTask}
-                currentUserId={currentUser._id}
-                canManageOverviewers={isCreator || currentUser.role === 'admin'}
               />
             )}
           </div>
