@@ -32,6 +32,27 @@ export interface Task {
     approvedBy?: { _id: string; name?: string } | string;
     rejectionReason?: string;
   }>;
+  overviewers?: Array<{
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+    addedBy: {
+      _id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+    addedAt: string;
+    permissions: {
+      canViewDetails: boolean;
+      canViewAttachments: boolean;
+      canViewRemarks: boolean;
+      canViewProgress: boolean;
+    };
+  }>;
   department: {
     _id: string;
     name: string;
@@ -217,6 +238,35 @@ export interface UpdateIndividualApprovalData {
   userId: string;
   decision: 'approve' | 'reject';
   reason?: string;
+}
+
+export interface OverviewerPermissions {
+  canViewDetails: boolean;
+  canViewAttachments: boolean;
+  canViewRemarks: boolean;
+  canViewProgress: boolean;
+}
+
+export interface AddOverviewerData {
+  userId: string;
+  permissions?: OverviewerPermissions;
+}
+
+export interface UpdateOverviewerPermissionsData {
+  userId: string;
+  permissions: OverviewerPermissions;
+}
+
+export interface RemoveOverviewerData {
+  userId: string;
+}
+
+export interface OverviewTasksResponse {
+  success: boolean;
+  data: {
+    tasks: Task[];
+    count: number;
+  };
 }
 
 class TaskService {
@@ -476,6 +526,79 @@ class TaskService {
   async updateIndividualApproval(id: string, data: UpdateIndividualApprovalData): Promise<TaskResponse> {
     const response = await api.put(`/tasks/${id}/individual-approval`, data);
     return response.data;
+  }
+
+  // ==================== OVERVIEWER METHODS ====================
+
+  /**
+   * Add overviewer to a task
+   */
+  async addOverviewer(taskId: string, data: AddOverviewerData): Promise<TaskResponse> {
+    const response = await api.post(`/tasks/${taskId}/overviewers`, data);
+    return response.data;
+  }
+
+  /**
+   * Remove overviewer from a task
+   */
+  async removeOverviewer(taskId: string, data: RemoveOverviewerData): Promise<TaskResponse> {
+    const response = await api.delete(`/tasks/${taskId}/overviewers`, { data });
+    return response.data;
+  }
+
+  /**
+   * Update overviewer permissions
+   */
+  async updateOverviewerPermissions(taskId: string, data: UpdateOverviewerPermissionsData): Promise<TaskResponse> {
+    const response = await api.put(`/tasks/${taskId}/overviewers/permissions`, data);
+    return response.data;
+  }
+
+  /**
+   * Get tasks where current user is an overviewer
+   */
+  async getOverviewTasks(): Promise<OverviewTasksResponse> {
+    const response = await api.get('/tasks/overview');
+    return response.data;
+  }
+
+  /**
+   * Check if current user is an overviewer for a task
+   */
+  isUserOverviewer(task: Task, userId: string): boolean {
+    return task.overviewers?.some(overviewer => overviewer.user._id === userId) || false;
+  }
+
+  /**
+   * Get overviewer permissions for current user on a task
+   */
+  getOverviewerPermissions(task: Task, userId: string): OverviewerPermissions | null {
+    const overviewer = task.overviewers?.find(ov => ov.user._id === userId);
+    return overviewer ? overviewer.permissions : null;
+  }
+
+  /**
+   * Check if user can perform certain actions on a task
+   */
+  getUserTaskPermissions(task: Task, userId: string) {
+    const isCreator = task.createdBy._id === userId;
+    const isAssignee = task.assignedTo.some(assignment => assignment.user._id === userId);
+    const isOverviewer = this.isUserOverviewer(task, userId);
+    const overviewerPermissions = this.getOverviewerPermissions(task, userId);
+
+    return {
+      isCreator,
+      isAssignee,
+      isOverviewer,
+      canEdit: isCreator || isAssignee,
+      canView: isCreator || isAssignee || isOverviewer,
+      canAddOverviewer: isCreator || isAssignee,
+      canViewDetails: isCreator || isAssignee || (isOverviewer && overviewerPermissions?.canViewDetails),
+      canViewAttachments: isCreator || isAssignee || (isOverviewer && overviewerPermissions?.canViewAttachments),
+      canViewRemarks: isCreator || isAssignee || (isOverviewer && overviewerPermissions?.canViewRemarks),
+      canViewProgress: isCreator || isAssignee || (isOverviewer && overviewerPermissions?.canViewProgress),
+      readOnly: isOverviewer && !isCreator && !isAssignee
+    };
   }
 }
 
