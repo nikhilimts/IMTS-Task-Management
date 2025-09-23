@@ -309,6 +309,10 @@ const TaskDetail: React.FC = () => {
     window.open(fileUrl, '_blank');
   };
 
+  const handleTaskUpdate = (updatedTask: Task) => {
+    setTask(updatedTask);
+  };
+
   const isPDF = (fileName: string) => {
     return fileName.toLowerCase().endsWith('.pdf');
   };
@@ -1024,6 +1028,7 @@ const TaskDetail: React.FC = () => {
             {!isCreateMode && task && (
               <OverviewerManagement 
                 task={task}
+                onTaskUpdate={handleTaskUpdate}
               />
             )}
           </div>
