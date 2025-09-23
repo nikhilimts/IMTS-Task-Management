@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 import authService from '../services/authService';
 import taskService from '../services/taskService';
 import type { Task as TaskType, TaskFilters } from '../services/taskService';
-import ProgressCard from '../components/ProgressCard';
 import NotificationBell from '../components/NotificationBell';
 import GroupTaskView from '../components/GroupTaskView';
 import OverviewerTasksTable from '../components/OverviewerTasksTable';
@@ -35,12 +34,6 @@ const AdminDashboard: React.FC = () => {
   
   // Task management state
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [dashboardStats, setDashboardStats] = useState({
-    notStarted: { count: 0, label: 'Not Started', percentage: 0 },
-    pending: { count: 0, label: 'Pending', percentage: 0 },
-    done: { count: 0, label: 'Done', percentage: 0 },
-    totalAssigned: 0,
-  });
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<TaskFilters>({
     page: 1,
@@ -61,7 +54,6 @@ const AdminDashboard: React.FC = () => {
   // Load tasks and stats on component mount
   useEffect(() => {
     loadTasks();
-    loadDashboardStats();
     loadCurrentUser();
   }, [filters]);
 
@@ -85,16 +77,6 @@ const AdminDashboard: React.FC = () => {
       toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadDashboardStats = async () => {
-    try {
-      const response = await taskService.getDashboardStats();
-      setDashboardStats(response.data);
-    } catch (error) {
-      console.error('Failed to load dashboard stats:', error);
-      toast.error('Failed to load dashboard statistics');
     }
   };
 
