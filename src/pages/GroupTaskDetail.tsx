@@ -5,6 +5,7 @@ import { FaSave } from 'react-icons/fa';
 import authService from '../services/authService';
 import taskService, { type Task } from '../services/taskService';
 import GroupTaskView from '../components/GroupTaskView';
+import OverviewerManagement from '../components/OverviewerManagement';
 
 const GroupTaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -318,6 +319,14 @@ const GroupTaskDetail: React.FC = () => {
         </div>
 
         <GroupTaskView task={task} currentUserId={currentUser?._id as string} onTaskUpdate={handleTaskUpdate} />
+
+        {/* Overviewer Management */}
+        <div className="mb-4">
+          <OverviewerManagement 
+            task={task}
+            onTaskUpdate={handleTaskUpdate}
+          />
+        </div>
 
         {/* Remarks Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
