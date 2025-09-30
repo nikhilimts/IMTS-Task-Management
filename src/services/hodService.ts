@@ -186,6 +186,18 @@ class HODService {
     const response = await api.get(`/hod/reports?${params}`);
     return response.data.data;
   }
+
+  // Get employee detail
+  async getEmployeeDetail(employeeId: string): Promise<{ data: Employee }> {
+    const response = await api.get(`/hod/employees/${employeeId}`);
+    return response.data;
+  }
+
+  // Get employee tasks
+  async getEmployeeTasks(employeeId: string): Promise<{ data: Task[] }> {
+    const response = await api.get(`/hod/employees/${employeeId}/tasks`);
+    return response.data;
+  }
 }
 
 export default new HODService();
