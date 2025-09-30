@@ -19,7 +19,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  role: 'employee' | 'hod' | 'admin';
+  role: 'employee' | 'hod' | 'admin' | 'super_admin';
   department: {
     _id: string;
     name: string;
