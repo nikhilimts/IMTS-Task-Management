@@ -14,6 +14,7 @@ import OverviewerTaskDetail from './pages/OverviewerTaskDetail';
 import HODDashboard from './pages/HODDashboard';
 import HODTasks from './pages/HODTasks';
 import HODEmployees from './pages/HODEmployees';
+import HODEmployeeDetail from './pages/HODEmployeeDetail';
 import HODReports from './pages/HODReports';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -142,6 +143,14 @@ function App() {
           element={
             <ProtectedRoute>
               <HODEmployees />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hod/employees/:employeeId"
+          element={
+            <ProtectedRoute>
+              <HODEmployeeDetail />
             </ProtectedRoute>
           }
         />
