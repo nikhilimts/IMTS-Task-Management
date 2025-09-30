@@ -274,7 +274,7 @@ const HODEmployees: React.FC = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/employees/${employee._id}`}
+                    onClick={() => window.location.href = `/hod/employees/${employee._id}`}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     View Details
