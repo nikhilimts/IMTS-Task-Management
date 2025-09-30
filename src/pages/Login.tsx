@@ -40,9 +40,17 @@ const Login: React.FC = () => {
         toast.success('Login successful! Welcome back.');
         console.log('Login successful:', response.data.user);
         
-        // Redirect to dashboard
+        // Role-based redirect
+        const userRole = response.data.user.role;
         setTimeout(() => {
-          navigate('/dashboard');
+          if (userRole === 'hod') {
+            navigate('/hod/dashboard');
+          } else if (userRole === 'super_admin') {
+            navigate('/admin/dashboard');
+          } else {
+            // Employee or other roles go to regular dashboard
+            navigate('/dashboard');
+          }
         }, 1500);
       }
     } catch (error: any) {
