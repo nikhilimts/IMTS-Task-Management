@@ -11,6 +11,10 @@ import TaskCreate from './pages/TaskCreate';
 import Tasks from './pages/Tasks';
 import GroupTaskDetail from './pages/GroupTaskDetail';
 import OverviewerTaskDetail from './pages/OverviewerTaskDetail';
+import HODDashboard from './pages/HODDashboard';
+import HODTasks from './pages/HODTasks';
+import HODEmployees from './pages/HODEmployees';
+import HODReports from './pages/HODReports';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = authService.isAuthenticated();
@@ -112,6 +116,40 @@ function App() {
           element={
             <ProtectedRoute>
               <GroupTaskDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HOD routes */}
+        <Route
+          path="/hod/dashboard"
+          element={
+            <ProtectedRoute>
+              <HODDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hod/tasks"
+          element={
+            <ProtectedRoute>
+              <HODTasks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hod/employees"
+          element={
+            <ProtectedRoute>
+              <HODEmployees />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hod/reports"
+          element={
+            <ProtectedRoute>
+              <HODReports />
             </ProtectedRoute>
           }
         />
