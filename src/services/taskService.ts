@@ -494,30 +494,80 @@ class TaskService {
    * Download task attachment
    */
   async downloadAttachment(taskId: string, attachmentId: string): Promise<void> {
-    const response = await api.get(`/tasks/${taskId}/attachments/${attachmentId}/download`, {
-      responseType: 'blob',
-    });
-    
-    // Create download link
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    
-    // Get filename from response headers
-    const contentDisposition = response.headers['content-disposition'];
-    let filename = 'download';
-    if (contentDisposition) {
-      const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-      if (filenameMatch) {
-        filename = filenameMatch[1];
+    try {
+      const response = await api.get(`/tasks/${taskId}/attachments/${attachmentId}/download`, {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'application/octet-stream'
+        }
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.style.display = 'none';
+      
+      // Get filename from response headers
+      const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition'];
+      let filename = 'download';
+      
+      if (contentDisposition) {
+        console.log('Content-Disposition header:', contentDisposition);
+        
+        // Try RFC 5987 format first (filename*=UTF-8''...)
+        const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;,\s]+)/);
+        if (utf8Match) {
+          try {
+            filename = decodeURIComponent(utf8Match[1]);
+            console.log('Using UTF-8 filename:', filename);
+          } catch (e) {
+            console.warn('Failed to decode UTF-8 filename:', e);
+          }
+        }
+        
+        // If UTF-8 didn't work, try simple format (filename="...")
+        if (filename === 'download') {
+          const simpleMatch = contentDisposition.match(/filename="([^"]+)"/);
+          if (simpleMatch) {
+            filename = simpleMatch[1];
+            console.log('Using simple filename:', filename);
+          }
+        }
+        
+        // Last resort: try filename without quotes
+        if (filename === 'download') {
+          const noQuotesMatch = contentDisposition.match(/filename=([^;,\s]+)/);
+          if (noQuotesMatch) {
+            filename = noQuotesMatch[1];
+            console.log('Using no-quotes filename:', filename);
+          }
+        }
       }
+      
+      // Ensure filename has an extension
+      if (filename === 'download') {
+        // Try to get content type to guess extension
+        const contentType = response.headers['content-type'] || response.headers['Content-Type'];
+        if (contentType) {
+          if (contentType.includes('image/jpeg')) filename = 'download.jpg';
+          else if (contentType.includes('image/png')) filename = 'download.png';
+          else if (contentType.includes('application/pdf')) filename = 'download.pdf';
+          else if (contentType.includes('text/plain')) filename = 'download.txt';
+        }
+      }
+      
+      console.log('Final download filename:', filename);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      throw error;
     }
-    
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
   }
 
   /**
