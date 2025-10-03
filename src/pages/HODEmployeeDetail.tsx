@@ -358,7 +358,7 @@ const HODEmployeeDetail: React.FC = () => {
                       <h3 className="text-lg font-medium text-gray-900">{task.title}</h3>
                       <p className="mt-1 text-sm text-gray-600">{task.description}</p>
                       <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Created by {task.createdBy.name}</span>
+                        <span>Created by {task.createdBy?.name || 'Unknown User'}</span>
                         <span>•</span>
                         <span>{formatDate(task.createdAt)}</span>
                         <span>•</span>

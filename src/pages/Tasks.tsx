@@ -305,7 +305,7 @@ const Tasks: React.FC = () => {
                           <div className="flex items-center mt-1 space-x-2">
                             <FaUser className="text-gray-400 text-xs" />
                             <span className="text-xs text-gray-500">
-                              {task.createdBy.name}
+                              {task.createdBy?.name || 'Unknown User'}
                             </span>
                           </div>
                         </div>
@@ -335,8 +335,8 @@ const Tasks: React.FC = () => {
                         <div className="flex flex-col space-y-1">
                           {task.assignedTo.length > 0 ? (
                             task.assignedTo.slice(0, 2).map((assignment) => (
-                              <div key={assignment.user._id} className="text-sm text-gray-900">
-                                {assignment.user.name}
+                              <div key={assignment.user?._id || 'unknown'} className="text-sm text-gray-900">
+                                {assignment.user?.name || 'Unknown User'}
                               </div>
                             ))
                           ) : (

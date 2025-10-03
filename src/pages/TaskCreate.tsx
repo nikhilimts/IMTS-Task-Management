@@ -378,17 +378,17 @@ const TaskCreate: React.FC = () => {
                 <div className="space-y-2">
                   {selectedUsers.map((assignment) => (
                     <div
-                      key={assignment.user._id}
+                      key={assignment.user?._id || 'unknown'}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                     >
                       <div className="flex items-center space-x-3">
                         <FaUser className="w-4 h-4 text-gray-400" />
                         <div>
                           <div className="font-medium text-gray-900">
-                            {assignment.user.name}
+                            {assignment.user?.name || 'Unknown User'}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {assignment.user.email}
+                            {assignment.user?.email || 'Unknown Email'}
                           </div>
                         </div>
                       </div>
