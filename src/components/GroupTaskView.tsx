@@ -83,7 +83,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
   };
 
   const getCurrentUserAssignment = () => {
-    return task.assignedTo.find(assignment => assignment.user._id === currentUserId);
+    return task.assignedTo.find(assignment => assignment.user?._id === currentUserId);
   };
 
   const calculateProgress = () => {
@@ -142,12 +142,12 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
       <div className="space-y-3">
         <h4 className="font-medium text-gray-700 mb-2">Individual Progress</h4>
         {task.assignedTo.map((assignment) => {
-          const isCurrentUser = assignment.user._id === currentUserId;
-          const isEditing = editingStage === assignment.user._id;
+          const isCurrentUser = assignment.user?._id === currentUserId;
+          const isEditing = editingStage === assignment.user?._id;
           
           return (
             <div
-              key={assignment.user._id}
+              key={assignment.user?._id || 'unknown'}
               className={`p-3 rounded-lg border ${
                 isCurrentUser ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
               }`}
@@ -157,15 +157,15 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                       <span className="text-xs font-medium text-gray-700">
-                        {assignment.user.name.split(' ').map(n => n[0]).join('')}
+                        {assignment.user?.name ? assignment.user.name.split(' ').map(n => n[0]).join('') : '?'}
                       </span>
                     </div>
                     <div>
                       <div className="font-medium text-gray-800">
-                        {assignment.user.name}
+                        {assignment.user?.name || 'Unknown User'}
                         {isCurrentUser && <span className="text-blue-600 text-xs ml-1">(You)</span>}
                       </div>
-                      <div className="text-xs text-gray-500">{assignment.user.email}</div>
+                      <div className="text-xs text-gray-500">{assignment.user?.email || 'Unknown Email'}</div>
                     </div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                   {/* Edit Button for Current User */}
                   {isCurrentUser && !isEditing && (assignment.individualStage === 'done' ? assignment.approval === 'approved' : true) && (
                     <button
-                      onClick={() => setEditingStage(assignment.user._id)}
+                      onClick={() => setEditingStage(assignment.user?._id)}
                       className="p-1 text-gray-500 hover:text-blue-600 transition-colors"
                       title={assignment.approval === 'approved' ? "Re-edit your approved work" : "Update your stage"}
                     >
@@ -257,14 +257,14 @@ const GroupTaskView: React.FC<GroupTaskViewProps> = ({ task, currentUserId, onTa
                   {assignment.approval !== 'approved' && (
                     <>
                       <button
-                        onClick={() => handleApproval(assignment.user._id, 'approve')}
+                        onClick={() => handleApproval(assignment.user?._id, 'approve')}
                         disabled={isUpdating}
                         className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:opacity-50"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => handleApproval(assignment.user._id, 'reject')}
+                        onClick={() => handleApproval(assignment.user?._id, 'reject')}
                         disabled={isUpdating}
                         className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:opacity-50"
                       >
