@@ -266,7 +266,7 @@ const HODTasks: React.FC = () => {
                           {task.assignedTo.map((assignment, index) => (
                             <div key={index} className="flex items-center mb-1">
                               <User className="h-4 w-4 text-gray-400 mr-1" />
-                              {assignment.user.name}
+                              {assignment.user?.name || 'Unknown User'}
                             </div>
                           ))}
                         </div>

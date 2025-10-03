@@ -180,7 +180,7 @@ const OverviewerTasksTable: React.FC<OverviewerTasksTableProps> = ({ className =
                     <div className="flex flex-col space-y-1">
                       {task.assignedTo?.slice(0, 2).map((assignment, index) => (
                         <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                          {assignment.user.name}
+                          {assignment.user?.name || 'Unknown User'}
                         </span>
                       ))}
                       {task.assignedTo && task.assignedTo.length > 2 && (

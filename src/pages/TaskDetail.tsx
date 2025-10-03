@@ -1007,13 +1007,13 @@ const TaskDetail: React.FC = () => {
                 <div className="space-y-2">
                   {task?.assignedTo && task.assignedTo.length > 0 ? (
                     task.assignedTo.map((assignment, index) => (
-                      <div key={`${assignment.user._id}-${index}`} className="flex items-center space-x-2">
+                      <div key={`${assignment.user?._id || 'unknown'}-${index}`} className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                           <FaUser className="text-blue-600 text-sm" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{assignment.user.name}</p>
-                          <p className="text-xs text-gray-500">{assignment.user.role}</p>
+                          <p className="text-sm font-medium text-gray-900">{assignment.user?.name || 'Unknown User'}</p>
+                          <p className="text-xs text-gray-500">{assignment.user?.role || 'Unknown'}</p>
                         </div>
                       </div>
                     ))

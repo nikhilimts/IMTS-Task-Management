@@ -506,7 +506,7 @@ const AdminDashboard: React.FC = () => {
                         </td>
                         <td className="py-2 px-4">
                           <div>
-                            <div className="font-medium">{task.createdBy.name}</div>
+                            <div className="font-medium">{task.createdBy?.name || 'Unknown User'}</div>
                           </div>
                         </td>
                         <td className="py-2 px-4">
@@ -533,7 +533,7 @@ const AdminDashboard: React.FC = () => {
                                 <div>
                                   {task.assignedTo.slice(0, 2).map((assignment, idx) => (
                                     <div key={idx} className="text-xs">
-                                      {assignment.user.name}
+                                      {assignment.user?.name || 'Unknown User'}
                                     </div>
                                   ))}
                                   {task.assignedTo.length > 2 && (

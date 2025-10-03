@@ -235,11 +235,11 @@ const GroupTaskDetail: React.FC = () => {
           {/* Show completion times for each assignee */}
           <div className="space-y-3 mb-6">
             {task.assignedTo.map((assignment, index) => (
-              <div key={`assignee-${assignment.user._id}-${index}`} className="p-3 border rounded-lg bg-gray-50">
+              <div key={`assignee-${assignment.user?._id || 'unknown'}-${index}`} className="p-3 border rounded-lg bg-gray-50">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-800">{assignment.user.name}</p>
-                    <p className="text-xs text-gray-600">{assignment.user.email}</p>
+                    <p className="text-sm font-medium text-gray-800">{assignment.user?.name || 'Unknown User'}</p>
+                    <p className="text-xs text-gray-600">{assignment.user?.email || 'Unknown Email'}</p>
                     <div className="mt-1 flex items-center space-x-4">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         assignment.individualStage === 'done' ? 'bg-green-100 text-green-800' :
