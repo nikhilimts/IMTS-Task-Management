@@ -61,6 +61,12 @@ const AdminDashboard: React.FC = () => {
     try {
       const userData = authService.getCurrentUser();
       setCurrentUser(userData);
+      
+      // Redirect admin users to system admin dashboard
+      if (userData && userData.role === 'admin') {
+        navigate('/admin/dashboard');
+        return;
+      }
     } catch (error) {
       console.error('Failed to load current user:', error);
     }
