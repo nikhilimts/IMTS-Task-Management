@@ -41,7 +41,8 @@ export interface Department {
   _id: string;
   name: string;
   description: string;
-  hodUser?: {
+  hod?: {
+    _id?: string;
     name: string;
     email: string;
   };
