@@ -131,11 +131,11 @@ const AdminDepartments: React.FC = () => {
                   <p className="text-gray-600 text-sm mb-4 line-clamp-2">{department.description}</p>
                 )}
 
-                {department.hodUser && (
+                {department.hod && (
                   <div className="mb-4">
                     <p className="text-sm text-gray-500">HOD:</p>
-                    <p className="text-sm font-medium text-gray-900">{department.hodUser.name}</p>
-                    <p className="text-xs text-gray-500">{department.hodUser.email}</p>
+                    <p className="text-sm font-medium text-gray-900">{department.hod.name}</p>
+                    <p className="text-xs text-gray-500">{department.hod.email}</p>
                   </div>
                 )}
 
