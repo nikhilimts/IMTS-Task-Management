@@ -47,7 +47,7 @@ const AdminDepartmentDetail: React.FC = () => {
   const [department, setDepartment] = useState<DepartmentDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'employees' | 'tasks'>('overview');
+  const [activeTab, setActiveTab] = useState<'employees' | 'tasks'>('employees');
   
   // Pagination states
   const [employeePage, setEmployeePage] = useState(1);
@@ -56,6 +56,14 @@ const AdminDepartmentDetail: React.FC = () => {
   const [taskPagination, setTaskPagination] = useState<any>(null);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(false);
+  
+  // Employee task view states
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [employeeTasks, setEmployeeTasks] = useState<any[]>([]);
+  const [loadingEmployeeTasks, setLoadingEmployeeTasks] = useState(false);
+  const [employeeTaskPagination, setEmployeeTaskPagination] = useState<any>(null);
+  const [employeeTaskPage, setEmployeeTaskPage] = useState(1);
+  
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -157,6 +165,46 @@ const AdminDepartmentDetail: React.FC = () => {
     } finally {
       setLoadingTasks(false);
     }
+  };
+
+  // Fetch tasks for a specific employee
+  const fetchEmployeeTasks = async (employeeId: string, page: number = 1) => {
+    if (!departmentId) return;
+    
+    try {
+      setLoadingEmployeeTasks(true);
+      const response = await adminService.getDepartmentTasks(departmentId, {
+        page,
+        limit: itemsPerPage,
+        assignedTo: employeeId
+      });
+      
+      const tasks = response.data.data.tasks.map((task: any) => ({
+        _id: task._id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        isGroupTask: task.isGroupTask || false,
+        assignedTo: task.assignedTo[0]?.user || { _id: '', name: 'Unassigned' },
+        createdAt: task.createdAt,
+        dueDate: task.deadline
+      }));
+      
+      setEmployeeTasks(tasks);
+      setEmployeeTaskPagination(response.data.data.pagination);
+    } catch (err) {
+      console.error('Error fetching employee tasks:', err);
+    } finally {
+      setLoadingEmployeeTasks(false);
+    }
+  };
+
+  // Handle employee click
+  const handleEmployeeClick = (employee: any) => {
+    setSelectedEmployee(employee);
+    setEmployeeTaskPage(1);
+    fetchEmployeeTasks(employee._id);
   };
 
   // Load initial data when tab changes
@@ -346,143 +394,190 @@ const AdminDepartmentDetail: React.FC = () => {
           <div className="border-b">
             <nav className="flex space-x-8 px-6">
               <button
-                onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'overview'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('employees')}
+                onClick={() => {
+                  setActiveTab('employees');
+                  setSelectedEmployee(null);
+                  setEmployeeTasks([]);
+                }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'employees'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Employees 
+                Employees ({department.statistics.totalEmployees})
               </button>
               <button
-                onClick={() => setActiveTab('tasks')}
+                onClick={() => {
+                  setActiveTab('tasks');
+                  setSelectedEmployee(null);
+                  setEmployeeTasks([]);
+                }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'tasks'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Tasks
+                Tasks ({department.statistics.totalTasks})
               </button>
             </nav>
           </div>
 
           <div className="p-6">
-            {activeTab === 'overview' && (
+            {activeTab === 'employees' && (
               <div className="space-y-6">
-                {/* HOD Information */}
-                {department.hod && (
+                {/* Employee List or Selected Employee Tasks */}
+                {!selectedEmployee ? (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Head of Department</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-center">
-                        <User className="w-10 h-10 text-gray-400" />
-                        <div className="ml-4">
-                          <p className="font-medium text-gray-900">{department.hod.name}</p>
-                          <p className="text-gray-600">{department.hod.email}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Employees</h3>
+                    <p className="text-sm text-gray-600 mb-4">Click on an employee to view their tasks</p>
+                    {loadingEmployees ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    ) : department.employees.length > 0 ? (
+                      <div className="space-y-4">
+                        {department.employees.map((employee) => (
+                          <div
+                            key={employee._id}
+                            onClick={() => handleEmployeeClick(employee)}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:bg-gray-50 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <User className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                  <h4 className="text-lg font-medium text-gray-900 hover:text-blue-600">
+                                    {employee.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-600">{employee.email}</p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                      {employee.role}
+                                    </span>
+                                    <span className="text-xs text-gray-500">
+                                      Joined: {new Date(employee.createdAt).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-blue-600">
+                                <span className="text-sm font-medium">View Tasks →</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <PaginationComponent
+                          pagination={employeePagination}
+                          currentPage={employeePage}
+                          onPageChange={(page) => {
+                            setEmployeePage(page);
+                            fetchEmployees(page);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No employees found in this department</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Selected Employee Tasks View */
+                  <div>
+                    <div className="flex items-center space-x-4 mb-6">
+                      <button
+                        onClick={() => {
+                          setSelectedEmployee(null);
+                          setEmployeeTasks([]);
+                        }}
+                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Back to Employees</span>
+                      </button>
+                      <div className="h-6 w-px bg-gray-300" />
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{selectedEmployee.name}</h3>
+                          <p className="text-sm text-gray-600">{selectedEmployee.email}</p>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Task Distribution */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Task Distribution</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <p className="text-sm text-green-600 font-medium">Completed</p>
-                      <p className="text-2xl font-bold text-green-700">{department.statistics.completedTasks}</p>
-                    </div>
-                    <div className="bg-yellow-50 rounded-lg p-4">
-                      <p className="text-sm text-yellow-600 font-medium">In Progress</p>
-                      <p className="text-2xl font-bold text-yellow-700">{department.statistics.inProgressTasks}</p>
-                    </div>
-                    <div className="bg-red-50 rounded-lg p-4">
-                      <p className="text-sm text-red-600 font-medium">Pending</p>
-                      <p className="text-2xl font-bold text-red-700">{department.statistics.pendingTasks}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'employees' && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Employees</h3>
-                {loadingEmployees ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : department.employees.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Role
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Joined
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {department.employees.map((employee) => (
-                          <tr key={employee._id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <User className="w-8 h-8 text-gray-400" />
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">{employee.name}</div>
+                    <h4 className="text-md font-medium text-gray-900 mb-4">Tasks Assigned to {selectedEmployee.name}</h4>
+                    
+                    {loadingEmployeeTasks ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    ) : employeeTasks.length > 0 ? (
+                      <div className="space-y-4">
+                        {employeeTasks.map((task) => (
+                          <div
+                            key={task._id}
+                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer hover:bg-gray-50"
+                            onClick={() => handleTaskClick(task)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <h4 className="text-lg font-medium text-gray-900 hover:text-blue-600">
+                                    {task.title}
+                                  </h4>
+                                  {task.isGroupTask && (
+                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                      <Users className="w-3 h-3 mr-1" />
+                                      Group Task
+                                    </span>
+                                  )}
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.status)}`}>
+                                    {task.status.replace('_', ' ')}
+                                  </span>
+                                  <span className={`text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                                    {task.priority} priority
+                                  </span>
+                                </div>
+                                <p className="text-gray-600 mb-2 line-clamp-2">{task.description}</p>
+                                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                  <span className="flex items-center">
+                                    <Calendar className="w-4 h-4 mr-1" />
+                                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                                  </span>
+                                  <span className="flex items-center">
+                                    <Clock className="w-4 h-4 mr-1" />
+                                    Created: {new Date(task.createdAt).toLocaleDateString()}
+                                  </span>
                                 </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {employee.email}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {employee.role}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(employee.createdAt).toLocaleDateString()}
-                            </td>
-                          </tr>
+                              <div className="ml-4 text-blue-600">
+                                <span className="text-sm font-medium">View Details →</span>
+                              </div>
+                            </div>
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
-                    <PaginationComponent
-                      pagination={employeePagination}
-                      currentPage={employeePage}
-                      onPageChange={(page) => {
-                        setEmployeePage(page);
-                        fetchEmployees(page);
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No employees found in this department</p>
+                        <PaginationComponent
+                          pagination={employeeTaskPagination}
+                          currentPage={employeeTaskPage}
+                          onPageChange={(page) => {
+                            setEmployeeTaskPage(page);
+                            fetchEmployeeTasks(selectedEmployee._id, page);
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <CheckSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No tasks assigned to {selectedEmployee.name}</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
