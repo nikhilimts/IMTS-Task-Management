@@ -363,7 +363,7 @@ const AdminDepartmentDetail: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Employees ({department.employees.length})
+                Employees 
               </button>
               <button
                 onClick={() => setActiveTab('tasks')}
@@ -373,7 +373,7 @@ const AdminDepartmentDetail: React.FC = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Tasks ({department.tasks.length})
+                Tasks
               </button>
             </nav>
           </div>
