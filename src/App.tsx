@@ -16,8 +16,14 @@ import HODTasks from './pages/HODTasks';
 import HODEmployees from './pages/HODEmployees';
 import HODEmployeeDetail from './pages/HODEmployeeDetail';
 import HODReports from './pages/HODReports';
+import SystemAdminDashboard from './pages/SystemAdminDashboard';
+import AdminDepartments from './pages/AdminDepartments';
+import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
+  children, 
+  requiredRole 
+}) => {
   const isAuthenticated = authService.isAuthenticated();
   const user = authService.getCurrentUser();
 
@@ -25,6 +31,18 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     // Clear any invalid tokens
     authService.logout();
     return <Navigate to="/login" replace />;
+  }
+
+  // If a specific role is required, check if user has that role
+  if (requiredRole && user.role !== requiredRole) {
+    // Redirect based on user's actual role
+    if (user.role === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (user.role === 'hod') {
+      return <Navigate to="/hod/dashboard" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;
@@ -159,6 +177,32 @@ function App() {
           element={
             <ProtectedRoute>
               <HODReports />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <SystemAdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/departments"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDepartments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/departments/:departmentId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDepartmentDetail />
             </ProtectedRoute>
           }
         />
