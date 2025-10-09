@@ -64,6 +64,10 @@ const AdminDepartmentDetail: React.FC = () => {
   const [employeeTaskPagination, setEmployeeTaskPagination] = useState<any>(null);
   const [employeeTaskPage, setEmployeeTaskPage] = useState(1);
   
+  // Employee statistics
+  const [employeeStats, setEmployeeStats] = useState<any>(null);
+  const [loadingEmployeeStats, setLoadingEmployeeStats] = useState(false);
+  
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -167,15 +171,59 @@ const AdminDepartmentDetail: React.FC = () => {
     }
   };
 
+  // Calculate employee statistics from tasks
+  const calculateEmployeeStats = (tasks: any[]) => {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.status === 'completed' || task.status === 'approved').length;
+    const inProgressTasks = tasks.filter(task => task.status === 'in_progress' || task.status === 'assigned').length;
+    const pendingTasks = tasks.filter(task => task.status === 'pending' || task.status === 'created').length;
+    const rejectedTasks = tasks.filter(task => task.status === 'rejected').length;
+    const overdueTasks = tasks.filter(task => {
+      const dueDate = new Date(task.dueDate);
+      const now = new Date();
+      return dueDate < now && !['completed', 'approved'].includes(task.status);
+    }).length;
+    
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(1) : '0.0';
+    
+    // Priority breakdown
+    const highPriorityTasks = tasks.filter(task => task.priority === 'high' || task.priority === 'urgent').length;
+    const mediumPriorityTasks = tasks.filter(task => task.priority === 'medium').length;
+    const lowPriorityTasks = tasks.filter(task => task.priority === 'low').length;
+    
+    return {
+      totalTasks,
+      completedTasks,
+      inProgressTasks,
+      pendingTasks,
+      rejectedTasks,
+      overdueTasks,
+      completionRate,
+      highPriorityTasks,
+      mediumPriorityTasks,
+      lowPriorityTasks
+    };
+  };
+
   // Fetch tasks for a specific employee
   const fetchEmployeeTasks = async (employeeId: string, page: number = 1) => {
     if (!departmentId) return;
     
     try {
       setLoadingEmployeeTasks(true);
+      setLoadingEmployeeStats(true);
+      
+      // Fetch paginated tasks for display
       const response = await adminService.getDepartmentTasks(departmentId, {
         page,
         limit: itemsPerPage,
+        assignedTo: employeeId
+      });
+      
+      // Fetch all tasks for statistics (without pagination)
+      const allTasksResponse = await adminService.getDepartmentTasks(departmentId, {
+        page: 1,
+        limit: 1000, // Large limit to get all tasks
         assignedTo: employeeId
       });
       
@@ -191,12 +239,26 @@ const AdminDepartmentDetail: React.FC = () => {
         dueDate: task.deadline
       }));
       
+      const allTasks = allTasksResponse.data.data.tasks.map((task: any) => ({
+        _id: task._id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        isGroupTask: task.isGroupTask || false,
+        assignedTo: task.assignedTo[0]?.user || { _id: '', name: 'Unassigned' },
+        createdAt: task.createdAt,
+        dueDate: task.deadline
+      }));
+      
       setEmployeeTasks(tasks);
       setEmployeeTaskPagination(response.data.data.pagination);
+      setEmployeeStats(calculateEmployeeStats(allTasks));
     } catch (err) {
       console.error('Error fetching employee tasks:', err);
     } finally {
       setLoadingEmployeeTasks(false);
+      setLoadingEmployeeStats(false);
     }
   };
 
@@ -511,6 +573,149 @@ const AdminDepartmentDetail: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Employee Performance Report */}
+                    {loadingEmployeeStats ? (
+                      <div className="mb-6">
+                        <div className="animate-pulse">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map((i) => (
+                              <div key={i} className="bg-gray-200 rounded-lg p-4 h-24"></div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : employeeStats && (
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium text-gray-900 mb-4">Performance Report</h4>
+                        
+                        {/* Main Statistics Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                            <div className="flex items-center">
+                              <CheckSquare className="w-6 h-6 text-blue-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                                <p className="text-2xl font-bold text-gray-900">{employeeStats.totalTasks}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                            <div className="flex items-center">
+                              <TrendingUp className="w-6 h-6 text-green-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Completed</p>
+                                <p className="text-2xl font-bold text-green-600">{employeeStats.completedTasks}</p>
+                                <p className="text-xs text-gray-500">{employeeStats.completionRate}% completion rate</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                            <div className="flex items-center">
+                              <Clock className="w-6 h-6 text-yellow-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">In Progress</p>
+                                <p className="text-2xl font-bold text-yellow-600">{employeeStats.inProgressTasks}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                            <div className="flex items-center">
+                              <Calendar className="w-6 h-6 text-red-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                                <p className="text-2xl font-bold text-red-600">{employeeStats.overdueTasks}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detailed Breakdown */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Status Breakdown */}
+                          <div className="bg-white rounded-lg shadow p-4">
+                            <h5 className="text-sm font-semibold text-gray-700 mb-3">Status Breakdown</h5>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Pending</span>
+                                <span className="text-sm font-medium text-yellow-600">{employeeStats.pendingTasks}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">In Progress</span>
+                                <span className="text-sm font-medium text-blue-600">{employeeStats.inProgressTasks}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Completed</span>
+                                <span className="text-sm font-medium text-green-600">{employeeStats.completedTasks}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Rejected</span>
+                                <span className="text-sm font-medium text-red-600">{employeeStats.rejectedTasks}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Priority Breakdown */}
+                          <div className="bg-white rounded-lg shadow p-4">
+                            <h5 className="text-sm font-semibold text-gray-700 mb-3">Priority Breakdown</h5>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">High/Urgent</span>
+                                <span className="text-sm font-medium text-red-600">{employeeStats.highPriorityTasks}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Medium</span>
+                                <span className="text-sm font-medium text-yellow-600">{employeeStats.mediumPriorityTasks}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Low</span>
+                                <span className="text-sm font-medium text-green-600">{employeeStats.lowPriorityTasks}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Performance Indicators */}
+                        <div className="mt-4 bg-white rounded-lg shadow p-4">
+                          <h5 className="text-sm font-semibold text-gray-700 mb-3">Performance Indicators</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="text-center">
+                              <div className={`text-2xl font-bold ${
+                                parseFloat(employeeStats.completionRate) >= 80 ? 'text-green-600' :
+                                parseFloat(employeeStats.completionRate) >= 60 ? 'text-yellow-600' :
+                                'text-red-600'
+                              }`}>
+                                {employeeStats.completionRate}%
+                              </div>
+                              <div className="text-xs text-gray-500">Completion Rate</div>
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-2xl font-bold ${
+                                employeeStats.overdueTasks === 0 ? 'text-green-600' :
+                                employeeStats.overdueTasks <= 2 ? 'text-yellow-600' :
+                                'text-red-600'
+                              }`}>
+                                {employeeStats.overdueTasks}
+                              </div>
+                              <div className="text-xs text-gray-500">Overdue Tasks</div>
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-2xl font-bold ${
+                                employeeStats.totalTasks >= 10 ? 'text-blue-600' :
+                                employeeStats.totalTasks >= 5 ? 'text-yellow-600' :
+                                'text-gray-600'
+                              }`}>
+                                {employeeStats.totalTasks}
+                              </div>
+                              <div className="text-xs text-gray-500">Tasks Assigned</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     <h4 className="text-md font-medium text-gray-900 mb-4">Tasks Assigned to {selectedEmployee.name}</h4>
                     
