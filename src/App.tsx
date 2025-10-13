@@ -11,6 +11,7 @@ import TaskCreate from './pages/TaskCreate';
 import Tasks from './pages/Tasks';
 import GroupTaskDetail from './pages/GroupTaskDetail';
 import OverviewerTaskDetail from './pages/OverviewerTaskDetail';
+import IndividualReport from './pages/IndividualReport';
 import HODDashboard from './pages/HODDashboard';
 import HODTasks from './pages/HODTasks';
 import HODEmployees from './pages/HODEmployees';
@@ -135,6 +136,14 @@ function App() {
           element={
             <ProtectedRoute>
               <GroupTaskDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report/individual"
+          element={
+            <ProtectedRoute>
+              <IndividualReport />
             </ProtectedRoute>
           }
         />
