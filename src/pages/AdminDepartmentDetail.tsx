@@ -627,18 +627,12 @@ const AdminDepartmentDetail: React.FC = () => {
                                 <span className="text-sm text-gray-600">Pending</span>
                                 <span className="text-sm font-medium text-yellow-600">{employeeStats.pendingTasks}</span>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">In Progress</span>
-                                <span className="text-sm font-medium text-blue-600">{employeeStats.inProgressTasks}</span>
-                              </div>
+                              
                               <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Completed</span>
                                 <span className="text-sm font-medium text-green-600">{employeeStats.completedTasks}</span>
                               </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600">Rejected</span>
-                                <span className="text-sm font-medium text-red-600">{employeeStats.rejectedTasks}</span>
-                              </div>
+                              
                             </div>
                           </div>
 
