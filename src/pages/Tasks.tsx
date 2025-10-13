@@ -153,7 +153,12 @@ const Tasks: React.FC = () => {
                 Dashboard
               </button>
               <span className="text-xl font-medium text-blue-600">Tasks</span>
-              <span className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">Reports</span>
+              <button 
+                onClick={() => navigate('/report/individual')}
+                className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                Reports
+              </button>
               <span className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">Settings</span>
             </div>
             <div className="flex items-center space-x-4">
