@@ -657,10 +657,7 @@ class TaskService {
   async getIndividualReport(filters: TaskFilters = {}): Promise<TasksResponse> {
     const params = new URLSearchParams();
     
-    // Add filter to get only tasks assigned to current user
-    params.append('assignedToMe', 'true');
-    
-    // Add other filters
+    // Add other filters (the backend automatically filters by current user)
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         params.append(key, value.toString());
