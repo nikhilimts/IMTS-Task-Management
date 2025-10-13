@@ -194,55 +194,7 @@ const SystemAdminDashboard: React.FC = () => {
         </div>
 
         {/* Additional Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-sm">{overallStats.activeTasks}</span>
-                  </div>
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-medium text-gray-500">Active Tasks</p>
-                  <p className="text-xs text-gray-400">Currently in progress</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold text-sm">{overallStats.completedTasks}</span>
-                  </div>
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-medium text-gray-500">Completed Tasks</p>
-                  <p className="text-xs text-gray-400">Successfully finished</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                    <span className="text-red-600 font-semibold text-sm">{overallStats.overdueTasks}</span>
-                  </div>
-                </div>
-                <div className="ml-5">
-                  <p className="text-sm font-medium text-gray-500">Overdue Tasks</p>
-                  <p className="text-xs text-gray-400">Past deadline</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Department Statistics */}
