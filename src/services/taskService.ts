@@ -650,6 +650,26 @@ class TaskService {
       readOnly: isOverviewer && !isCreator && !isAssignee
     };
   }
+
+  /**
+   * Get individual user report - all tasks assigned to the current user
+   */
+  async getIndividualReport(filters: TaskFilters = {}): Promise<TasksResponse> {
+    const params = new URLSearchParams();
+    
+    // Add filter to get only tasks assigned to current user
+    params.append('assignedToMe', 'true');
+    
+    // Add other filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+
+    const response = await api.get(`/tasks/individual-report?${params.toString()}`);
+    return response.data;
+  }
 }
 
 export default new TaskService();
