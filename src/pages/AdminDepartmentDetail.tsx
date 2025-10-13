@@ -582,38 +582,38 @@ const AdminDepartmentDetail: React.FC = () => {
                         <h4 className="text-md font-medium text-gray-900 mb-4">Performance Report</h4>
                         
                         {/* Main Statistics Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                        <div className="flex flex-wrap justify-center gap-4 mb-4">
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-                            <div className="flex items-center">
-                              <CheckSquare className="w-6 h-6 text-blue-600" />
-                              <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                                <p className="text-2xl font-bold text-gray-900">{employeeStats.totalTasks}</p>
-                              </div>
+                          <div className="flex items-center">
+                            <CheckSquare className="w-6 h-6 text-blue-600" />
+                            <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                            <p className="text-2xl font-bold text-gray-900">{employeeStats.totalTasks}</p>
                             </div>
+                          </div>
                           </div>
 
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                            <div className="flex items-center">
-                              <TrendingUp className="w-6 h-6 text-green-600" />
-                              <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-600">Completed</p>
-                                <p className="text-2xl font-bold text-green-600">{employeeStats.completedTasks}</p>
-                                <p className="text-xs text-gray-500">{employeeStats.completionRate}% completion rate</p>
-                              </div>
+                          <div className="flex items-center">
+                            <TrendingUp className="w-6 h-6 text-green-600" />
+                            <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Completed</p>
+                            <p className="text-2xl font-bold text-green-600">{employeeStats.completedTasks}</p>
+                            <p className="text-xs text-gray-500">{employeeStats.completionRate}% completion rate</p>
                             </div>
+                          </div>
                           </div>
 
                           
 
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-                            <div className="flex items-center">
-                              <Calendar className="w-6 h-6 text-red-600" />
-                              <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-600">Overdue</p>
-                                <p className="text-2xl font-bold text-red-600">{employeeStats.overdueTasks}</p>
-                              </div>
+                          <div className="flex items-center">
+                            <Calendar className="w-6 h-6 text-red-600" />
+                            <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Overdue</p>
+                            <p className="text-2xl font-bold text-red-600">{employeeStats.overdueTasks}</p>
                             </div>
+                          </div>
                           </div>
                         </div>
 
