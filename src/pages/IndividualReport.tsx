@@ -162,6 +162,12 @@ const IndividualReport: React.FC = () => {
   const exportToExcel = async () => {
     try {
       setExportLoading(true);
+      
+      if (!currentUser) {
+        toast.error('User information not available');
+        return;
+      }
+      
       const allTasks = await loadAllTasksForExport();
       
       if (allTasks.length === 0) {
@@ -187,9 +193,9 @@ const IndividualReport: React.FC = () => {
           'Due Date': formatDate(task.deadline),
           'Created Date': formatDate(task.createdAt),
           'Completed Date': task.completedAt ? formatDate(task.completedAt) : 'Not Completed',
-          'Creator': task.createdBy.name,
-          'Creator Email': task.createdBy.email,
-          'Department': task.department.name,
+          'Creator': task.createdBy?.name || 'Unknown',
+          'Creator Email': task.createdBy?.email || 'Unknown',
+          'Department': task.department?.name || 'Unknown',
           'Is Overdue': isOverdueTask ? 'Yes' : 'No',
           'Days Since Assignment': Math.floor((new Date().getTime() - new Date(userAssignment?.assignedAt || task.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
           'Tags': task.tags?.join(', ') || 'None',
@@ -233,7 +239,8 @@ const IndividualReport: React.FC = () => {
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-      const fileName = `Individual_Tasks_Report_${currentUser?.name.replace(/\s+/g, '_')}_${dateStr}_${timeStr}.xlsx`;
+      const userName = currentUser?.name ? currentUser.name.replace(/\s+/g, '_') : 'User';
+      const fileName = `Individual_Tasks_Report_${userName}_${dateStr}_${timeStr}.xlsx`;
 
       // Save file
       XLSX.writeFile(wb, fileName);
