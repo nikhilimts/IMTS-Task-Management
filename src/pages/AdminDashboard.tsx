@@ -247,6 +247,12 @@ const AdminDashboard: React.FC = () => {
             >
               <BsFillPlusCircleFill /> <span className="hidden sm:inline">Create Task</span><span className="sm:hidden">Create</span>
             </button>
+            <button 
+              onClick={() => navigate('/report/individual')}
+              className="bg-green-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-green-700 transition-colors"
+            >
+              <FaEye /> <span className="hidden sm:inline">My Report</span><span className="sm:hidden">Report</span>
+            </button>
             <NotificationBell />
             <div className="relative user-dropdown">
               <FaUserCircle 
