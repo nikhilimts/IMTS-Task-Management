@@ -409,13 +409,13 @@ const AdminDepartmentDetail: React.FC = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="flex flex-wrap justify-center gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <Users className="w-8 h-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-2xl font-bold text-gray-900">{department.statistics.totalEmployees}</p>
+          <p className="text-sm font-medium text-gray-600">Total Employees</p>
+          <p className="text-2xl font-bold text-gray-900">{department.statistics.totalEmployees}</p>
               </div>
             </div>
           </div>
@@ -424,8 +424,8 @@ const AdminDepartmentDetail: React.FC = () => {
             <div className="flex items-center">
               <CheckSquare className="w-8 h-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-2xl font-bold text-gray-900">{department.statistics.totalTasks}</p>
+          <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+          <p className="text-2xl font-bold text-gray-900">{department.statistics.totalTasks}</p>
               </div>
             </div>
           </div>
@@ -434,21 +434,13 @@ const AdminDepartmentDetail: React.FC = () => {
             <div className="flex items-center">
               <TrendingUp className="w-8 h-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed Tasks</p>
-                <p className="text-2xl font-bold text-green-600">{department.statistics.completedTasks}</p>
+          <p className="text-sm font-medium text-gray-600">Completed Tasks</p>
+          <p className="text-2xl font-bold text-green-600">{department.statistics.completedTasks}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <Clock className="w-8 h-8 text-yellow-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Tasks</p>
-                <p className="text-2xl font-bold text-yellow-600">{department.statistics.pendingTasks}</p>
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         {/* Tabs */}
