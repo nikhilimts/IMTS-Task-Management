@@ -173,10 +173,7 @@ const HODDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">Department Name</p>
               <p className="text-lg font-medium text-gray-900">{department.name}</p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Description</p>
-              <p className="text-lg font-medium text-gray-900">{department.description}</p>
-            </div>
+            
           </div>
         </div>
 
