@@ -604,15 +604,7 @@ const AdminDepartmentDetail: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-                            <div className="flex items-center">
-                              <Clock className="w-6 h-6 text-yellow-600" />
-                              <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-600">In Progress</p>
-                                <p className="text-2xl font-bold text-yellow-600">{employeeStats.inProgressTasks}</p>
-                              </div>
-                            </div>
-                          </div>
+                          
 
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
                             <div className="flex items-center">
