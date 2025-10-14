@@ -188,7 +188,6 @@ const IndividualReport: React.FC = () => {
           'Type': task.isGroupTask ? 'Group Task' : 'Individual Task',
           'Priority': task.priority?.toUpperCase(),
           'Status': isCompleted ? 'Completed' : task.stage === 'done' ? 'Pending Approval' : task.stage === 'pending' ? 'In Progress' : 'Not Started',
-          'Individual Stage': userAssignment?.individualStage || 'N/A',
           'Assigned Date': formatDate(userAssignment?.assignedAt || task.createdAt),
           'Due Date': formatDate(task.deadline),
           'Created Date': formatDate(task.createdAt),
@@ -216,7 +215,6 @@ const IndividualReport: React.FC = () => {
         { wch: 15 },  // Type
         { wch: 10 },  // Priority
         { wch: 15 },  // Status
-        { wch: 15 },  // Individual Stage
         { wch: 15 },  // Assigned Date
         { wch: 15 },  // Due Date
         { wch: 15 },  // Created Date
