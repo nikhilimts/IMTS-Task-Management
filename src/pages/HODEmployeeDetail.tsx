@@ -11,7 +11,10 @@ import {
   Clock,
   AlertTriangle,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Eye,
+  Search,
+  X
 } from 'lucide-react';
 import hodService from '../services/hodService';
 
@@ -54,6 +57,8 @@ const HODEmployeeDetail: React.FC = () => {
   
   const [employee, setEmployee] = useState<EmployeeDetail | null>(null);
   const [tasks, setTasks] = useState<TaskDetail[]>([]);
+  const [filteredTasks, setFilteredTasks] = useState<TaskDetail[]>([]);
+  const [taskSearchTerm, setTaskSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'tasks'>('overview');
@@ -121,6 +126,31 @@ const HODEmployeeDetail: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Filter tasks based on search term
+  useEffect(() => {
+    if (!taskSearchTerm.trim()) {
+      setFilteredTasks(tasks);
+    } else {
+      const filtered = tasks.filter(task =>
+        task.title.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+        task.description.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+        task.status.toLowerCase().includes(taskSearchTerm.toLowerCase()) ||
+        task.priority.toLowerCase().includes(taskSearchTerm.toLowerCase())
+      );
+      setFilteredTasks(filtered);
+    }
+  }, [tasks, taskSearchTerm]);
+
+  // Handle task search
+  const handleTaskSearch = (searchTerm: string) => {
+    setTaskSearchTerm(searchTerm);
+  };
+
+  // Clear task search
+  const clearTaskSearch = () => {
+    setTaskSearchTerm('');
   };
 
   if (loading) {
@@ -342,16 +372,46 @@ const HODEmployeeDetail: React.FC = () => {
 
         {activeTab === 'tasks' && (
           <div className="space-y-4">
-            {tasks.length === 0 ? (
+            {/* Task Search Bar */}
+            <div className="bg-white rounded-lg shadow-sm p-4">
+              <div className="relative" style={{ height: '40px', maxWidth: '400px' }}>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search tasks by title, description, status, or priority..."
+                  value={taskSearchTerm}
+                  onChange={(e) => handleTaskSearch(e.target.value)}
+                  className="w-full h-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  style={{ minHeight: '40px', height: '40px' }}
+                />
+                {taskSearchTerm && (
+                  <button
+                    onClick={clearTaskSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {taskSearchTerm && (
+                <div className="mt-2 text-sm text-gray-600">
+                  Showing {filteredTasks.length} of {tasks.length} tasks
+                </div>
+              )}
+            </div>
+
+            {filteredTasks.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                 <ClipboardList className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No tasks found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">
+                  {taskSearchTerm ? 'No tasks match your search' : 'No tasks found'}
+                </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  This employee has not been assigned any tasks yet.
+                  {taskSearchTerm ? 'Try adjusting your search terms.' : 'This employee has not been assigned any tasks yet.'}
                 </p>
               </div>
             ) : (
-              tasks.map((task) => (
+              filteredTasks.map((task) => (
                 <div key={task._id} className="bg-white rounded-lg shadow-sm p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -365,13 +425,20 @@ const HODEmployeeDetail: React.FC = () => {
                         <span>Due: {formatDate(task.deadline)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 ml-4">
+                    <div className="flex items-center space-x-3 ml-4">
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(task.priority)}`}>
                         {task.priority}
                       </span>
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(task.status)}`}>
                         {task.status}
                       </span>
+                      <button
+                        onClick={() => navigate(`/tasks/${task._id}`)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span>Task View</span>
+                      </button>
                     </div>
                   </div>
                 </div>
