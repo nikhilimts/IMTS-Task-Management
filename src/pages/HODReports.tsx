@@ -164,7 +164,7 @@ const HODReports: React.FC = () => {
             {/* Report Header */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900">{report.department.name} Department</h2>
+                <h2 className="text-2xl font-bold text-gray-900">{report.department.name} </h2>
                 <p className="text-gray-600 mt-2">
                   Report Period: {formatDate(report.reportPeriod.startDate)} - {formatDate(report.reportPeriod.endDate)}
                 </p>
