@@ -667,6 +667,32 @@ class TaskService {
     const response = await api.get(`/tasks/individual-report?${params.toString()}`);
     return response.data;
   }
+
+  /**
+   * Get unique creators from existing tasks
+   */
+  async getTaskCreators(): Promise<{success: boolean; data: Array<{_id: string; name: string}>}> {
+    try {
+      const response = await api.get('/tasks/creators');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch task creators:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get unique assigned users from existing tasks (including group task members)
+   */
+  async getTaskAssignees(): Promise<{success: boolean; data: Array<{_id: string; name: string}>}> {
+    try {
+      const response = await api.get('/tasks/assignees');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch task assignees:', error);
+      throw error;
+    }
+  }
 }
 
 export default new TaskService();
