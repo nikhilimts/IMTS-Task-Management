@@ -154,6 +154,13 @@ const HODDashboard: React.FC = () => {
               </div>
               <div className="flex items-center space-x-4">
                 <button
+                  onClick={() => navigate('/dashboard')}
+                  className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center space-x-2"
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Your Tasks</span>
+                </button>
+                <button
                   onClick={fetchDashboardData}
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
                 >
@@ -201,21 +208,7 @@ const HODDashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Main Dashboard</h3>
-              <Home className="h-6 w-6 text-orange-600" />
-            </div>
-            <p className="text-gray-600 mb-4">Access the main task management dashboard</p>
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700"
-            >
-              Go to Dashboard
-            </button>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Manage Tasks</h3>
