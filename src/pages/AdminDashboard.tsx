@@ -77,29 +77,29 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const loadFilterData = async () => {
-    // Fallback function - try to load from API endpoints if available
-    try {
-      setLoadingFilterData(true);
+  // const loadFilterData = async () => {
+  //   // Fallback function - try to load from API endpoints if available
+  //   try {
+  //     setLoadingFilterData(true);
       
-      const [creatorsResponse, assigneesResponse] = await Promise.allSettled([
-        taskService.getTaskCreators(),
-        taskService.getTaskAssignees()
-      ]);
+  //     const [creatorsResponse, assigneesResponse] = await Promise.allSettled([
+  //       taskService.getTaskCreators(),
+  //       taskService.getTaskAssignees()
+  //     ]);
       
-      if (creatorsResponse.status === 'fulfilled' && creatorsResponse.value.success) {
-        setCreators(creatorsResponse.value.data);
-      }
+  //     if (creatorsResponse.status === 'fulfilled' && creatorsResponse.value.success) {
+  //       setCreators(creatorsResponse.value.data);
+  //     }
       
-      if (assigneesResponse.status === 'fulfilled' && assigneesResponse.value.success) {
-        setAssignees(assigneesResponse.value.data);
-      }
-    } catch (error) {
-      console.warn('API endpoints not available, using local data extraction');
-    } finally {
-      setLoadingFilterData(false);
-    }
-  };
+  //     if (assigneesResponse.status === 'fulfilled' && assigneesResponse.value.success) {
+  //       setAssignees(assigneesResponse.value.data);
+  //     }
+  //   } catch (error) {
+  //     console.warn('API endpoints not available, using local data extraction');
+  //   } finally {
+  //     setLoadingFilterData(false);
+  //   }
+  // };
 
   const loadTasks = async () => {
     try {
