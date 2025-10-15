@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers } from 'react-icons/fa';
+import { FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers, FaHome } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -330,6 +330,14 @@ const AdminDashboard: React.FC = () => {
             >
               <BsFillPlusCircleFill /> <span className="hidden sm:inline">Create Task</span><span className="sm:hidden">Create</span>
             </button>
+            {currentUser?.role === 'hod' && (
+              <button 
+                onClick={() => navigate('/hod/dashboard')}
+                className="bg-orange-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-orange-700 transition-colors"
+              >
+                <FaHome /> <span className="hidden sm:inline">Back to HOD Dashboard</span><span className="sm:hidden">HOD Dashboard</span>
+              </button>
+            )}
             <button 
               onClick={() => navigate('/report/individual')}
               className="bg-green-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-green-700 transition-colors"
