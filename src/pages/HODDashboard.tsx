@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   ClipboardList, 
@@ -6,7 +7,8 @@ import {
   AlertTriangle, 
   CheckCircle, 
   Clock,
-  BarChart3
+  BarChart3,
+  Home
 } from 'lucide-react';
 import hodService from '../services/hodService';
 
@@ -31,6 +33,7 @@ interface DashboardData {
 }
 
 const HODDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -198,7 +201,21 @@ const HODDashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Main Dashboard</h3>
+              <Home className="h-6 w-6 text-orange-600" />
+            </div>
+            <p className="text-gray-600 mb-4">Access the main task management dashboard</p>
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Manage Tasks</h3>
