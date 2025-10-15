@@ -68,6 +68,10 @@ const AdminDepartmentDetail: React.FC = () => {
   const [employeeStats, setEmployeeStats] = useState<any>(null);
   const [loadingEmployeeStats, setLoadingEmployeeStats] = useState(false);
   
+  // Search states
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [taskSearchTerm, setTaskSearchTerm] = useState('');
+  
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -112,14 +116,15 @@ const AdminDepartmentDetail: React.FC = () => {
   }, [departmentId]);
 
   // Fetch employees with pagination
-  const fetchEmployees = async (page: number = 1) => {
+  const fetchEmployees = async (page: number = 1, search: string = '') => {
     if (!departmentId) return;
     
     try {
       setLoadingEmployees(true);
       const response = await adminService.getDepartmentEmployees(departmentId, {
         page,
-        limit: itemsPerPage
+        limit: itemsPerPage,
+        search: search || employeeSearchTerm
       });
       
       const employees = response.data.data.employees.map((emp: any) => ({
@@ -140,14 +145,15 @@ const AdminDepartmentDetail: React.FC = () => {
   };
 
   // Fetch tasks with pagination
-  const fetchTasks = async (page: number = 1) => {
+  const fetchTasks = async (page: number = 1, search: string = '') => {
     if (!departmentId) return;
     
     try {
       setLoadingTasks(true);
       const response = await adminService.getDepartmentTasks(departmentId, {
         page,
-        limit: itemsPerPage
+        limit: itemsPerPage,
+        search: search || taskSearchTerm
       });
       
       const tasks = response.data.data.tasks.map((task: any) => ({
@@ -269,6 +275,34 @@ const AdminDepartmentDetail: React.FC = () => {
     fetchEmployeeTasks(employee._id);
   };
 
+  // Handle employee search
+  const handleEmployeeSearch = (searchTerm: string) => {
+    setEmployeeSearchTerm(searchTerm);
+    setEmployeePage(1);
+    fetchEmployees(1, searchTerm);
+  };
+
+  // Handle task search
+  const handleTaskSearch = (searchTerm: string) => {
+    setTaskSearchTerm(searchTerm);
+    setTaskPage(1);
+    fetchTasks(1, searchTerm);
+  };
+
+  // Clear employee search
+  const clearEmployeeSearch = () => {
+    setEmployeeSearchTerm('');
+    setEmployeePage(1);
+    fetchEmployees(1, '');
+  };
+
+  // Clear task search
+  const clearTaskSearch = () => {
+    setTaskSearchTerm('');
+    setTaskPage(1);
+    fetchTasks(1, '');
+  };
+
   // Load initial data when tab changes
   useEffect(() => {
     if (activeTab === 'employees' && department && department.employees.length === 0) {
@@ -277,6 +311,13 @@ const AdminDepartmentDetail: React.FC = () => {
       fetchTasks(taskPage);
     }
   }, [activeTab, departmentId, employeePage, taskPage]);
+
+  // Load employees immediately after department is loaded (fixes initial load issue)
+  useEffect(() => {
+    if (department && activeTab === 'employees' && department.employees.length === 0) {
+      fetchEmployees(1);
+    }
+  }, [department, activeTab]);
 
   // Handle task click navigation
   const handleTaskClick = (task: any) => {
@@ -485,6 +526,37 @@ const AdminDepartmentDetail: React.FC = () => {
                 {!selectedEmployee ? (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Employees</h3>
+                    
+                    {/* Employee Search */}
+                    <div className="mb-6 h-16">
+                      <div className="relative h-10">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Search employees by name or email..."
+                          value={employeeSearchTerm}
+                          onChange={(e) => handleEmployeeSearch(e.target.value)}
+                          className="block w-full h-10 pl-10 pr-20 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                        />
+                        {employeeSearchTerm && (
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                            <button
+                              onClick={clearEmployeeSearch}
+                              className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                            >
+                              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
                     <p className="text-sm text-gray-600 mb-4">Click on an employee to view their tasks</p>
                     {loadingEmployees ? (
                       <div className="flex justify-center py-8">
@@ -529,7 +601,7 @@ const AdminDepartmentDetail: React.FC = () => {
                           currentPage={employeePage}
                           onPageChange={(page) => {
                             setEmployeePage(page);
-                            fetchEmployees(page);
+                            fetchEmployees(page, employeeSearchTerm);
                           }}
                         />
                       </div>
@@ -769,6 +841,36 @@ const AdminDepartmentDetail: React.FC = () => {
             {activeTab === 'tasks' && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Tasks</h3>
+                
+                {/* Task Search */}
+                <div className="mb-6 h-16">
+                  <div className="relative h-10">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search tasks by title or description..."
+                      value={taskSearchTerm}
+                      onChange={(e) => handleTaskSearch(e.target.value)}
+                      className="block w-full h-10 pl-10 pr-20 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                    />
+                    {taskSearchTerm && (
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                        <button
+                          onClick={clearTaskSearch}
+                          className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                        >
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 {loadingTasks ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -827,7 +929,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       currentPage={taskPage}
                       onPageChange={(page) => {
                         setTaskPage(page);
-                        fetchTasks(page);
+                        fetchTasks(page, taskSearchTerm);
                       }}
                     />
                   </div>
