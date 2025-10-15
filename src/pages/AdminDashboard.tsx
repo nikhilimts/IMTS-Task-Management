@@ -50,6 +50,11 @@ const AdminDashboard: React.FC = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Filter options state
+  const [creators, setCreators] = useState<Array<{_id: string; name: string}>>([]);
+  const [assignees, setAssignees] = useState<Array<{_id: string; name: string}>>([]);
+  const [loadingFilterData, setLoadingFilterData] = useState(false);
 
   // Load tasks and stats on component mount
   useEffect(() => {
@@ -72,6 +77,30 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const loadFilterData = async () => {
+    // Fallback function - try to load from API endpoints if available
+    try {
+      setLoadingFilterData(true);
+      
+      const [creatorsResponse, assigneesResponse] = await Promise.allSettled([
+        taskService.getTaskCreators(),
+        taskService.getTaskAssignees()
+      ]);
+      
+      if (creatorsResponse.status === 'fulfilled' && creatorsResponse.value.success) {
+        setCreators(creatorsResponse.value.data);
+      }
+      
+      if (assigneesResponse.status === 'fulfilled' && assigneesResponse.value.success) {
+        setAssignees(assigneesResponse.value.data);
+      }
+    } catch (error) {
+      console.warn('API endpoints not available, using local data extraction');
+    } finally {
+      setLoadingFilterData(false);
+    }
+  };
+
   const loadTasks = async () => {
     try {
       setLoading(true);
@@ -83,6 +112,60 @@ const AdminDashboard: React.FC = () => {
       toast.error('Failed to load tasks');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Update filter data when tasks change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      updateFilterDataFromTasks();
+    }
+  }, [tasks]);
+
+  const updateFilterDataFromTasks = () => {
+    try {
+      setLoadingFilterData(true);
+      
+      // Extract unique creators
+      const uniqueCreators = tasks.reduce((acc, task) => {
+        if (task.createdBy && task.createdBy._id && task.createdBy.name) {
+          const existing = acc.find(c => c._id === task.createdBy._id);
+          if (!existing) {
+            acc.push({
+              _id: task.createdBy._id,
+              name: task.createdBy.name
+            });
+          }
+        }
+        return acc;
+      }, [] as Array<{_id: string; name: string}>);
+
+      // Extract unique assignees (including group task members)
+      const uniqueAssignees = tasks.reduce((acc, task) => {
+        task.assignedTo.forEach(assignment => {
+          if (assignment.user && assignment.user._id && assignment.user.name) {
+            const existing = acc.find(a => a._id === assignment.user._id);
+            if (!existing) {
+              acc.push({
+                _id: assignment.user._id,
+                name: assignment.user.name
+              });
+            }
+          }
+        });
+        return acc;
+      }, [] as Array<{_id: string; name: string}>);
+
+      // Sort both arrays by name
+      uniqueCreators.sort((a, b) => a.name.localeCompare(b.name));
+      uniqueAssignees.sort((a, b) => a.name.localeCompare(b.name));
+
+      setCreators(uniqueCreators);
+      setAssignees(uniqueAssignees);
+    } catch (error) {
+      console.error('Failed to update filter data:', error);
+    } finally {
+      setLoadingFilterData(false);
     }
   };
 
@@ -311,47 +394,48 @@ const AdminDashboard: React.FC = () => {
         <div className="space-y-4 mb-6 w-full">
           {/* Search Bar */}
           <div className="bg-white p-2 sm:p-4 rounded-lg shadow-md w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2 h-8">
               <h3 className="text-lg font-medium text-gray-900">Search & Filter Tasks</h3>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="bg-gray-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-gray-700 transition-colors"
+                className="bg-gray-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-gray-700 transition-colors h-8 w-auto whitespace-nowrap"
               >
                 <FaFilter /> <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
               </button>
             </div>
             
-            <div className="flex items-center relative w-full">
-              <form onSubmit={handleSearch} className="w-full flex flex-col sm:flex-row">
-                <div className="relative w-full">
+            {/* Fixed height search container */}
+            <div className="flex items-center relative w-full h-10 mb-2">
+              <form onSubmit={handleSearch} className="w-full flex flex-col sm:flex-row h-10">
+                <div className="relative w-full h-10">
                   <input
                     type="text"
                     placeholder="Search tasks..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full h-10 py-2 pl-10 pr-4 rounded-l-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                   />
-                  <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-500" />
+                  <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-500 z-10" />
                 </div>
                 <button
                   type="submit"
-                  className="mt-2 sm:mt-0 sm:ml-2 px-4 py-2 bg-blue-600 text-white rounded-md sm:rounded-r-md hover:bg-blue-700 transition-colors"
+                  className="mt-2 sm:mt-0 sm:ml-2 px-4 py-2 h-10 bg-blue-600 text-white rounded-md sm:rounded-r-md hover:bg-blue-700 transition-colors w-full sm:w-auto flex items-center justify-center"
                 >
                   <FaSearch />
                 </button>
               </form>
             </div>
 
-            {/* Filters Panel */}
+            {/* Filters Panel - Fixed container height */}
             {showFilters && (
-              <div className="mt-4 pt-4 border-t">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="mt-4 pt-4 border-t min-h-[200px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select
                       value={filters.status || ''}
                       onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                     >
                       <option value="">All Status</option>
                       <option value="created">Created</option>
@@ -369,7 +453,7 @@ const AdminDashboard: React.FC = () => {
                     <select
                       value={filters.priority || ''}
                       onChange={(e) => handleFilterChange('priority', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                     >
                       <option value="">All Priority</option>
                       <option value="low">Low</option>
@@ -383,7 +467,7 @@ const AdminDashboard: React.FC = () => {
                     <select
                       value={filters.stage || ''}
                       onChange={(e) => handleFilterChange('stage', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                     >
                       <option value="">All Stages</option>
                       <option value="not_started">Not Started</option>
@@ -391,12 +475,53 @@ const AdminDashboard: React.FC = () => {
                       <option value="done">Done</option>
                     </select>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Creator
+                      {loadingFilterData && <span className="text-xs text-gray-500 ml-2">(Loading...)</span>}
+                    </label>
+                    <select
+                      value={filters.createdBy || ''}
+                      onChange={(e) => handleFilterChange('createdBy', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                      disabled={loadingFilterData}
+                    >
+                      <option value="">All Creators</option>
+                      {creators.map((creator) => (
+                        <option key={creator._id} value={creator._id}>
+                          {creator.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Assigned To
+                      {loadingFilterData && <span className="text-xs text-gray-500 ml-2">(Loading...)</span>}
+                    </label>
+                    <select
+                      value={filters.assignedTo || ''}
+                      onChange={(e) => handleFilterChange('assignedTo', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                      disabled={loadingFilterData}
+                    >
+                      <option value="">All Assignees</option>
+                      {assignees.map((assignee) => (
+                        <option key={assignee._id} value={assignee._id}>
+                          {assignee.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
                     <select
                       value={filters.sortBy || 'createdAt'}
                       onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                     >
                       <option value="createdAt">Created Date</option>
                       <option value="deadline">Deadline</option>
@@ -406,12 +531,12 @@ const AdminDashboard: React.FC = () => {
                     </select>
                   </div>
                 </div>
-                <div className="mt-4 flex justify-between items-center">
+                <div className="mt-4 flex justify-between items-center h-10">
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium text-gray-700">Sort Order:</label>
                     <button
                       onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className={`px-3 py-1 rounded-md text-sm ${
+                      className={`px-3 py-1 rounded-md text-sm h-8 whitespace-nowrap ${
                         filters.sortOrder === 'desc' 
                           ? 'bg-blue-600 text-white' 
                           : 'bg-gray-200 text-gray-700'
@@ -430,7 +555,7 @@ const AdminDashboard: React.FC = () => {
                       });
                       setSearchTerm('');
                     }}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors h-8 flex items-center whitespace-nowrap"
                   >
                     Clear Filters
                   </button>
