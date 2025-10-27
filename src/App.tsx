@@ -20,6 +20,7 @@ import HODReports from './pages/HODReports';
 import SystemAdminDashboard from './pages/SystemAdminDashboard';
 import AdminDepartments from './pages/AdminDepartments';
 import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
+import AdminReports from './pages/AdminReports';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
   children, 
@@ -212,6 +213,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminDepartmentDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminReports />
             </ProtectedRoute>
           }
         />
