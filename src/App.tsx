@@ -21,6 +21,7 @@ import SystemAdminDashboard from './pages/SystemAdminDashboard';
 import AdminDepartments from './pages/AdminDepartments';
 import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
 import AdminReports from './pages/AdminReports';
+import SystemAdminEmployees from './pages/SystemAdminEmployees';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
   children, 
@@ -197,6 +198,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <SystemAdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/employees"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <SystemAdminEmployees />
             </ProtectedRoute>
           }
         />
