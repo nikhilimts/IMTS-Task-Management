@@ -11,7 +11,7 @@ import {
   Building
 } from 'lucide-react';
 import { adminService } from '../services/adminService';
-import type { Employee } from '../services/adminService';
+import type { Employee, Department } from '../services/adminService';
 
 interface EmployeeFilters {
   page?: number;
@@ -19,6 +19,7 @@ interface EmployeeFilters {
   search?: string;
   isActive?: boolean;
   role?: string;
+  department?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -28,6 +29,7 @@ const SystemAdminEmployees: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -46,6 +48,19 @@ const SystemAdminEmployees: React.FC = () => {
   useEffect(() => {
     fetchEmployees();
   }, [filters]);
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await adminService.getAllDepartments();
+      setDepartments(response.data.data);
+    } catch (err) {
+      console.error('Failed to fetch departments:', err);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -168,7 +183,7 @@ const SystemAdminEmployees: React.FC = () => {
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -203,6 +218,20 @@ const SystemAdminEmployees: React.FC = () => {
               <option value="hod">HOD</option>
               <option value="admin">Admin</option>
               <option value="super_admin">Super Admin</option>
+            </select>
+
+            {/* Department Filter */}
+            <select
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={filters.department || ''}
+              onChange={(e) => handleFilterChange('department', e.target.value || undefined)}
+            >
+              <option value="">All Departments</option>
+              {departments.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
+                </option>
+              ))}
             </select>
 
             {/* Sort By */}
