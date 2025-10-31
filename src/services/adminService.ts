@@ -198,5 +198,30 @@ export const adminService = {
 
   // User Management
   toggleUserAccess: (userId: string, isActive: boolean) =>
-    api.put(`/admin/users/${userId}/toggle-access`, { isActive }),
+    api.put(`/super-admin/users/${userId}/toggle-access`, { isActive }),
+
+  // Get all employees across departments
+  getAllEmployees: (params?: {
+    page?: number;
+    limit?: number;
+    role?: string;
+    department?: string;
+    search?: string;
+    isActive?: boolean;
+    sortBy?: string;
+    sortOrder?: string;
+  }) => 
+    api.get<{ 
+      success: boolean; 
+      data: { 
+        users: Employee[]; 
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalUsers: number;
+          hasNextPage: boolean;
+          hasPrevPage: boolean;
+        }
+      } 
+    }>('/super-admin/employees', { params }),
 };
