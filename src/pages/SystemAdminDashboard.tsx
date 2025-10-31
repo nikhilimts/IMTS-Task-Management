@@ -107,6 +107,13 @@ const SystemAdminDashboard: React.FC = () => {
             </div>
             <div className="flex space-x-3">
               <button
+                onClick={() => navigate('/admin/employees')}
+                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center space-x-2"
+              >
+                <FaUsers />
+                <span>Employees</span>
+              </button>
+              <button
                 onClick={() => navigate('/admin/reports')}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
               >
