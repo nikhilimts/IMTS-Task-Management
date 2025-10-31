@@ -131,6 +131,16 @@ class AuthService {
     }
     return data.data || [];
   }
+
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }>{
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  }
+
+  async resetPassword(email: string, otp: string, newPassword: string): Promise<{ success: boolean; message: string }>{
+    const response = await api.post('/auth/reset-password', { email, otp, newPassword });
+    return response.data;
+  }
 }
 
 export default new AuthService();
