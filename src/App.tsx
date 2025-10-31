@@ -22,6 +22,8 @@ import AdminDepartments from './pages/AdminDepartments';
 import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
 import AdminReports from './pages/AdminReports';
 import SystemAdminEmployees from './pages/SystemAdminEmployees';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
   children, 
@@ -88,6 +90,22 @@ function App() {
           element={
             <PublicRoute>
               <Signup />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicRoute>
+              <ResetPassword />
             </PublicRoute>
           }
         />
