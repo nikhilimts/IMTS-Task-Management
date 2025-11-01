@@ -299,7 +299,7 @@ const SystemAdminDashboard: React.FC = () => {
                         </span>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        {task.department.name} • {task.createdBy.name}
+                        {task.department?.name || 'Unknown'} • {task.createdBy?.name || 'Unknown'}
                       </p>
                       <p className="text-xs text-gray-400">
                         {new Date(task.createdAt).toLocaleDateString()}
