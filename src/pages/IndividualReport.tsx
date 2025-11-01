@@ -7,6 +7,28 @@ import type { Task } from '../services/taskService';
 import authService from '../services/authService';
 import { ArrowLeft, Download, Filter, Search, Calendar, User, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
+// Helper function to sanitize task user references
+const sanitizeTask = (task: Task): Task => {
+  return {
+    ...task,
+    createdBy: task.createdBy || {
+      _id: '',
+      name: 'Unknown User',
+      email: 'unknown@example.com',
+      role: 'unknown'
+    },
+    assignedTo: task.assignedTo?.map(assignment => ({
+      ...assignment,
+      user: assignment.user || {
+        _id: '',
+        name: 'Unknown User',
+        email: 'unknown@example.com',
+        role: 'unknown'
+      }
+    })) || []
+  };
+};
+
 interface FilterState {
   status: string;
   priority: string;
@@ -54,7 +76,10 @@ const IndividualReport: React.FC = () => {
         )
       });
       
-      setTasks(response.data.tasks);
+      // Sanitize tasks to prevent null reference errors
+      const sanitizedTasks = response.data.tasks.map(sanitizeTask);
+      
+      setTasks(sanitizedTasks);
       setTotalTasks(response.data.pagination.totalTasks);
       setCurrentPage(response.data.pagination.currentPage);
       setTotalPages(response.data.pagination.totalPages);
@@ -75,7 +100,8 @@ const IndividualReport: React.FC = () => {
           Object.entries(filters).filter(([_, value]) => value !== '')
         )
       });
-      return response.data.tasks;
+      // Sanitize tasks to prevent null reference errors
+      return response.data.tasks.map(sanitizeTask);
     } catch (error) {
       console.error('Error loading all tasks:', error);
       return [];
@@ -574,8 +600,8 @@ const IndividualReport: React.FC = () => {
                           {formatDate(task.createdAt)}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{task.createdBy.name}</div>
-                          <div className="text-sm text-gray-500">{task.createdBy.email}</div>
+                          <div className="text-sm text-gray-900">{task.createdBy?.name || 'Unknown User'}</div>
+                          <div className="text-sm text-gray-500">{task.createdBy?.email || 'unknown@example.com'}</div>
                         </td>
                       </tr>
                     ))}
