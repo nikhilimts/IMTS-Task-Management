@@ -224,4 +224,11 @@ export const adminService = {
         }
       } 
     }>('/super-admin/employees', { params }),
+
+  // Employee detail methods
+  getEmployeeDetail: (employeeId: string) =>
+    api.get(`/admin/employees/${employeeId}`),
+
+  getEmployeeTasks: (employeeId: string) =>
+    api.get(`/admin/employees/${employeeId}/tasks`),
 };
