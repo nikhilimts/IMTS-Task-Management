@@ -22,6 +22,7 @@ import AdminDepartments from './pages/AdminDepartments';
 import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
 import AdminReports from './pages/AdminReports';
 import SystemAdminEmployees from './pages/SystemAdminEmployees';
+import AdminEmployeeDetail from './pages/AdminEmployeeDetail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
@@ -224,6 +225,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <SystemAdminEmployees />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/employees/:employeeId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminEmployeeDetail />
             </ProtectedRoute>
           }
         />
