@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   UserCheck,
@@ -25,6 +26,7 @@ interface EmployeeFilters {
 }
 
 const SystemAdminEmployees: React.FC = () => {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -342,7 +344,7 @@ const SystemAdminEmployees: React.FC = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/admin/employees/${employee._id}`}
+                    onClick={() => navigate(`/admin/employees/${employee._id}`)}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     View Details
