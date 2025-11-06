@@ -38,7 +38,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
     authService.logout();
     return <Navigate to="/login" replace />;
   }
-
+   
+  //testing
   // If a specific role is required, check if user has that role
   if (requiredRole && user.role !== requiredRole) {
     // Redirect based on user's actual role
