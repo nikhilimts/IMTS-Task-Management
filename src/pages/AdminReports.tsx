@@ -288,63 +288,62 @@ const AdminReports: React.FC = () => {
               </div>
             </div>
 
-            {/* Tasks by Status and Priority */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Tasks by Status */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Tasks by Status
-                </h3>
-                <div className="space-y-4">
-                  {report.tasksByStatus?.map((item) => {
-                    const total = report?.tasksByStatus?.reduce((sum, item) => sum + item.count, 0) || 0;
-                    const percentage = total > 0 ? (item.count / total * 100).toFixed(1) : 0;
-
-                    return (
-                      <div key={item._id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className={`w-4 h-4 rounded-full ${getStatusColor(item._id)} mr-3`}></div>
-                          <span className="text-sm font-medium text-gray-700 capitalize">
-                            {item._id.replace('_', ' ')}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-600">{item.count}</span>
-                          <span className="text-xs text-gray-400">({percentage}%)</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+            {/* Priority Task Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Medium Priority */}
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                      <h3 className="text-sm font-semibold text-gray-900">Medium Priority</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {report.tasksByPriority?.find(item => item._id === 'medium')?.count || 0}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Tasks</p>
+                  </div>
+                  <div className="p-2 bg-yellow-100 rounded-full">
+                    <AlertTriangle className="h-6 w-6 text-yellow-600" />
+                  </div>
                 </div>
               </div>
 
-              {/* Tasks by Priority */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <AlertTriangle className="h-5 w-5 mr-2" />
-                  Tasks by Priority
-                </h3>
-                <div className="space-y-4">
-                  {report.tasksByPriority?.map((item) => {
-                    const total = report.tasksByPriority?.reduce((sum, task) => sum + task.count, 0) || 0;
-                    const percentage = total > 0 ? (item.count / total * 100).toFixed(1) : 0;
+              {/* High Priority */}
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+                      <h3 className="text-sm font-semibold text-gray-900">High Priority</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {report.tasksByPriority?.find(item => item._id === 'high')?.count || 0}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Tasks</p>
+                  </div>
+                  <div className="p-2 bg-orange-100 rounded-full">
+                    <AlertTriangle className="h-6 w-6 text-orange-600" />
+                  </div>
+                </div>
+              </div>
 
-                    return (
-                      <div key={item._id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className={`w-4 h-4 rounded-full ${getPriorityColor(item._id)} mr-3`}></div>
-                          <span className="text-sm font-medium text-gray-700 capitalize">
-                            {item._id}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-sm text-gray-600">{item.count}</span>
-                          <span className="text-xs text-gray-400">({percentage}%)</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* Urgent Priority */}
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center mb-1">
+                      <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                      <h3 className="text-sm font-semibold text-gray-900">Urgent Priority</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-red-600">
+                      {report.tasksByPriority?.find(item => item._id === 'urgent')?.count || 0}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Tasks</p>
+                  </div>
+                  <div className="p-2 bg-red-100 rounded-full">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -375,7 +374,7 @@ const AdminReports: React.FC = () => {
                         Pending
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status Breakdown
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -407,19 +406,13 @@ const AdminReports: React.FC = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600 font-medium">
                             {pendingTasks}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            <div className="flex flex-wrap gap-1">
-                              {dept.statusBreakdown
-                                .filter(status => status.status !== 'created')
-                                .map((status, statusIndex) => (
-                                <span 
-                                  key={statusIndex} 
-                                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                                >
-                                  {status.status}: {status.count}
-                                </span>
-                              ))}
-                            </div>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <button
+                              onClick={() => navigate(`/admin/departments/${dept._id.departmentId}`)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors"
+                            >
+                              View
+                            </button>
                           </td>
                         </tr>
                       );
