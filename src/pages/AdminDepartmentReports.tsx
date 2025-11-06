@@ -106,6 +106,36 @@ const AdminDepartmentReports: React.FC = () => {
     }
   };
 
+  // Merge completed and approved tasks into a single "Completed" category
+  const getProcessedTasksByStatus = () => {
+    if (!report?.tasksByStatus) return [];
+    
+    const statusMap = new Map();
+    let completedCount = 0;
+    
+    report.tasksByStatus.forEach(item => {
+      if (item._id === 'completed' || item._id === 'approved') {
+        completedCount += item.count;
+      } else {
+        statusMap.set(item._id, item.count);
+      }
+    });
+    
+    const processedTasks = [];
+    
+    // Add merged completed tasks
+    if (completedCount > 0) {
+      processedTasks.push({ _id: 'completed', count: completedCount });
+    }
+    
+    // Add other status categories
+    statusMap.forEach((count, status) => {
+      processedTasks.push({ _id: status, count });
+    });
+    
+    return processedTasks;
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'urgent':
@@ -269,8 +299,8 @@ const AdminDepartmentReports: React.FC = () => {
                 </h3>
                 <div className="space-y-4">
                   {report.tasksByStatus && report.tasksByStatus.length > 0 ? (
-                    report.tasksByStatus.map((item) => {
-                      const total = (report.tasksByStatus || []).reduce((sum, task) => sum + task.count, 0);
+                    getProcessedTasksByStatus().map((item) => {
+                      const total = getProcessedTasksByStatus().reduce((sum, task) => sum + task.count, 0);
                       const percentage = total > 0 ? (item.count / total * 100).toFixed(1) : '0';
                       
                       return (
