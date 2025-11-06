@@ -182,12 +182,6 @@ export const adminService = {
       } 
     }>(`/admin/departments/${departmentId}/employees`, { params }),
 
-  getDepartmentReport: (departmentId: string, params?: {
-    startDate?: string;
-    endDate?: string;
-  }) => 
-    api.get(`/admin/departments/${departmentId}/reports`, { params }),
-
   // Reports
   getSystemReport: (params?: {
     startDate?: string;
@@ -231,4 +225,16 @@ export const adminService = {
 
   getEmployeeTasks: (employeeId: string) =>
     api.get(`/admin/employees/${employeeId}/tasks`),
+
+  // Department report method
+  getDepartmentReport: async (departmentId: string, startDate: string, endDate: string) => {
+    try {
+      const response = await api.get(`/admin/departments/${departmentId}/reports`, {
+        params: { startDate, endDate }
+      });
+      return response.data.data;
+    } catch (error) {
+      throw new Error('Failed to fetch department report');
+    }
+  },
 };

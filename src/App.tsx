@@ -20,6 +20,7 @@ import HODReports from './pages/HODReports';
 import SystemAdminDashboard from './pages/SystemAdminDashboard';
 import AdminDepartments from './pages/AdminDepartments';
 import AdminDepartmentDetail from './pages/AdminDepartmentDetail';
+import AdminDepartmentReports from './pages/AdminDepartmentReports';
 import AdminReports from './pages/AdminReports';
 import SystemAdminEmployees from './pages/SystemAdminEmployees';
 import AdminEmployeeDetail from './pages/AdminEmployeeDetail';
@@ -249,6 +250,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminDepartmentDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/departments/:departmentId/reports"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminDepartmentReports />
             </ProtectedRoute>
           }
         />
