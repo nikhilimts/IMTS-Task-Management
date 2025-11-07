@@ -40,6 +40,14 @@ interface FilterState {
   endDate: string;
 }
 
+interface TaskStatistics {
+  total: number;
+  completed: number;
+  inProgress: number;
+  notStarted: number;
+  overdue: number;
+}
+
 const IndividualReport: React.FC = () => {
   const navigate = useNavigate();
   const currentUser = authService.getCurrentUser();
@@ -50,6 +58,13 @@ const IndividualReport: React.FC = () => {
   const [totalTasks, setTotalTasks] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [statistics, setStatistics] = useState<TaskStatistics>({
+    total: 0,
+    completed: 0,
+    inProgress: 0,
+    notStarted: 0,
+    overdue: 0
+  });
   
   const [filters, setFilters] = useState<FilterState>({
     status: '',
@@ -83,6 +98,11 @@ const IndividualReport: React.FC = () => {
       setTotalTasks(response.data.pagination.totalTasks);
       setCurrentPage(response.data.pagination.currentPage);
       setTotalPages(response.data.pagination.totalPages);
+      
+      // Update statistics from API response
+      if (response.data.statistics) {
+        setStatistics(response.data.statistics);
+      }
     } catch (error) {
       console.error('Error loading tasks:', error);
       toast.error('Failed to load tasks');
@@ -278,13 +298,8 @@ const IndividualReport: React.FC = () => {
     }
   };
 
-  const taskStats = {
-    total: totalTasks,
-    completed: tasks.filter(t => t.stage === 'done' && (t.status === 'approved' || t.status === 'completed')).length,
-    inProgress: tasks.filter(t => t.stage === 'pending').length,
-    notStarted: tasks.filter(t => t.stage === 'not_started').length,
-    overdue: tasks.filter(t => isOverdue(t.deadline, t.status, t.stage)).length
-  };
+  // Use statistics from API instead of calculating from paginated tasks
+  const taskStats = statistics;
 
   if (!currentUser) {
     return (
