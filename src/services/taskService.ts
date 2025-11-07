@@ -156,7 +156,6 @@ export interface TasksResponse {
       total: number;
       completed: number;
       inProgress: number;
-      notStarted: number;
       overdue: number;
     };
     pagination: {
