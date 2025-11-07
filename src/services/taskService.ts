@@ -152,6 +152,13 @@ export interface TasksResponse {
   success: boolean;
   data: {
     tasks: Task[];
+    statistics?: {
+      total: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+      overdue: number;
+    };
     pagination: {
       currentPage: number;
       totalPages: number;
