@@ -87,39 +87,6 @@ const AdminReports: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-      case 'approved':
-        return 'bg-green-500';
-      case 'in_progress':
-      case 'assigned':
-        return 'bg-blue-500';
-      case 'pending':
-        return 'bg-yellow-500';
-      case 'cancelled':
-      case 'rejected':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-500';
-      case 'high':
-        return 'bg-orange-500';
-      case 'medium':
-        return 'bg-yellow-500';
-      case 'low':
-        return 'bg-green-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
   // Calculate key metrics
   const getApprovedTasks = () => {
     const approved = report?.tasksByStatus?.find(item => item._id === 'approved')?.count || 0;
@@ -154,17 +121,17 @@ const AdminReports: React.FC = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Admin Reports</h1>
                 <p className="mt-1 text-sm text-gray-500">
                   Comprehensive analytics and task management reports
                 </p>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
                 <button
                   onClick={() => window.print()}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center justify-center"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Export Report
