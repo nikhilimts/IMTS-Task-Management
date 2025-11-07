@@ -118,14 +118,14 @@ const SystemAdminEmployees: React.FC = () => {
 
   const getStatusBadge = (isActive: boolean) => {
     return isActive ? (
-      <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-        <UserCheck className="h-3 w-3 mr-1" />
-        Active
+      <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium sm:font-semibold rounded-full bg-green-100 text-green-800 whitespace-nowrap">
+        <UserCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+        <span>Active</span>
       </span>
     ) : (
-      <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-        <UserX className="h-3 w-3 mr-1" />
-        Inactive
+      <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium sm:font-semibold rounded-full bg-red-100 text-red-800 whitespace-nowrap">
+        <UserX className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+        <span>Inactive</span>
       </span>
     );
   };
@@ -286,7 +286,7 @@ const SystemAdminEmployees: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {employees.map((employee) => (
               <div key={employee._id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-0">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
@@ -294,15 +294,17 @@ const SystemAdminEmployees: React.FC = () => {
                       </div>
                     </div>
                     <div className="ml-4 flex-1">
-                      <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
-                      <p className="text-sm text-gray-500 flex items-center">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
+                        <div className="flex items-center">
+                          {getStatusBadge(employee.isActive)}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-500 flex items-center mt-1">
                         <Mail className="h-4 w-4 mr-1" />
                         {employee.email}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusBadge(employee.isActive)}
                   </div>
                 </div>
 
