@@ -197,7 +197,7 @@ const TaskCreate: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/dashboard')}
@@ -212,7 +212,7 @@ const TaskCreate: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 sm:ml-auto">
               <NotificationBell />
               <button
                 onClick={handleSubmit}
