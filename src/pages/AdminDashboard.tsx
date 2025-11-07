@@ -318,9 +318,6 @@ const AdminDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <div className="flex items-center w-full sm:w-auto">
-            <button className="sm:hidden text-2xl mr-3" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? <FaTimes /> : <FaBars />}
-            </button>
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Task Management Dashboard</h1>
           </div>
           <div className="flex flex-wrap space-x-2 sm:space-x-3 items-center ml-auto mt-2 sm:mt-0">
