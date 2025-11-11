@@ -236,11 +236,21 @@ const SystemAdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="text-center">
                           <p className="text-gray-500">Users</p>
-                          <p className="font-semibold text-blue-600">{dept.stats.totalUsers}</p>
+                          <p 
+                            className="font-semibold text-blue-600 cursor-pointer hover:text-blue-800 transition-colors"
+                            onClick={() => navigate(`/admin/departments/${dept.department._id}?tab=employees`)}
+                          >
+                            {dept.stats.totalUsers}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="text-gray-500">Tasks</p>
-                          <p className="font-semibold text-purple-600">{dept.stats.totalTasks}</p>
+                          <p 
+                            className="font-semibold text-purple-600 cursor-pointer hover:text-purple-800 transition-colors"
+                            onClick={() => navigate(`/admin/departments/${dept.department._id}?tab=tasks`)}
+                          >
+                            {dept.stats.totalTasks}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="text-gray-500">Active</p>
