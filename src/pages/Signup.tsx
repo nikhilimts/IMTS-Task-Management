@@ -28,6 +28,13 @@ const Signup: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
 
   useEffect(() => {
     loadDepartments();
@@ -46,11 +53,27 @@ const Signup: React.FC = () => {
     }
   };
 
+  const checkPasswordRequirements = (password: string) => {
+    setPasswordRequirements({
+      minLength: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      specialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+    });
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value
     });
+
+    // Check password requirements when password field changes
+    if (name === 'password') {
+      checkPasswordRequirements(value);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,6 +83,14 @@ const Signup: React.FC = () => {
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Check if all password requirements are met
+    const allRequirementsMet = Object.values(passwordRequirements).every(req => req);
+    if (!allRequirementsMet) {
+      toast.error('Please ensure your password meets all the requirements');
       setLoading(false);
       return;
     }
@@ -159,7 +190,7 @@ const Signup: React.FC = () => {
               placeholder="••••••••"
               className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
-              minLength={6}
+              minLength={8}
             />
             <button
               type="button"
@@ -178,6 +209,33 @@ const Signup: React.FC = () => {
               )}
             </button>
           </div>
+          
+          {/* Password Requirements */}
+          <div className="mt-2 text-sm">
+            <p className="text-gray-600 mb-1 font-medium">Password must contain:</p>
+            <div className="space-y-1">
+              <div className={`flex items-center text-xs ${passwordRequirements.minLength ? 'text-green-600' : 'text-red-500'}`}>
+                <span className="mr-2">{passwordRequirements.minLength ? '✓' : '✗'}</span>
+                At least 8 characters
+              </div>
+              <div className={`flex items-center text-xs ${passwordRequirements.uppercase ? 'text-green-600' : 'text-red-500'}`}>
+                <span className="mr-2">{passwordRequirements.uppercase ? '✓' : '✗'}</span>
+                One uppercase letter (A-Z)
+              </div>
+              <div className={`flex items-center text-xs ${passwordRequirements.lowercase ? 'text-green-600' : 'text-red-500'}`}>
+                <span className="mr-2">{passwordRequirements.lowercase ? '✓' : '✗'}</span>
+                One lowercase letter (a-z)
+              </div>
+              <div className={`flex items-center text-xs ${passwordRequirements.number ? 'text-green-600' : 'text-red-500'}`}>
+                <span className="mr-2">{passwordRequirements.number ? '✓' : '✗'}</span>
+                One number (0-9)
+              </div>
+              <div className={`flex items-center text-xs ${passwordRequirements.specialChar ? 'text-green-600' : 'text-red-500'}`}>
+                <span className="mr-2">{passwordRequirements.specialChar ? '✓' : '✗'}</span>
+                One special character (!@#$%^&*)
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="mb-5">
@@ -194,7 +252,7 @@ const Signup: React.FC = () => {
               placeholder="••••••••"
               className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
-              minLength={6}
+              minLength={8}
             />
             <button
               type="button"
