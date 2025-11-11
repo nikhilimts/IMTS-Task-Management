@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Users, CheckSquare, Clock, TrendingUp, User, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { adminService } from '../services/adminService';
 
@@ -44,10 +44,14 @@ interface DepartmentDetailData {
 const AdminDepartmentDetail: React.FC = () => {
   const { departmentId } = useParams<{ departmentId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [department, setDepartment] = useState<DepartmentDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'employees' | 'tasks'>('employees');
+  const [activeTab, setActiveTab] = useState<'employees' | 'tasks'>(() => {
+    const tabParam = searchParams.get('tab');
+    return (tabParam === 'tasks' || tabParam === 'employees') ? tabParam : 'employees';
+  });
   
   // Pagination states
   const [employeePage, setEmployeePage] = useState(1);
@@ -367,6 +371,13 @@ const AdminDepartmentDetail: React.FC = () => {
     }
   }, [department, activeTab]);
 
+  // Load tasks immediately after department is loaded (fixes initial load issue)
+  useEffect(() => {
+    if (department && activeTab === 'tasks' && department.tasks.length === 0) {
+      fetchTasks(1);
+    }
+  }, [department, activeTab]);
+
   // Handle task click navigation
   const handleTaskClick = (task: any) => {
     if (task.isGroupTask) {
@@ -539,6 +550,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   setActiveTab('employees');
                   setSelectedEmployee(null);
                   setEmployeeTasks([]);
+                  // Update URL without causing a navigation
+                  const newSearchParams = new URLSearchParams(searchParams);
+                  newSearchParams.set('tab', 'employees');
+                  window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'employees'
@@ -553,6 +568,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   setActiveTab('tasks');
                   setSelectedEmployee(null);
                   setEmployeeTasks([]);
+                  // Update URL without causing a navigation
+                  const newSearchParams = new URLSearchParams(searchParams);
+                  newSearchParams.set('tab', 'tasks');
+                  window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'tasks'
