@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserCircle, FaBars, FaTimes, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers, FaHome } from 'react-icons/fa';
+import { FaUserCircle, FaSignOutAlt, FaFilter, FaSearch, FaEye, FaUsers, FaHome } from 'react-icons/fa';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { BsFillPlusCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,6 @@ import ErrorBoundary from '../components/ErrorBoundary';
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
