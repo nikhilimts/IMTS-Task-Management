@@ -442,9 +442,7 @@ const AdminDepartmentDetail: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{department.name}</h1>
-              <p className="text-gray-600 mt-1">
-                Head of Department: {department.hod?.name || 'Not assigned'}
-              </p>
+             
             </div>
           </div>
         </div>
