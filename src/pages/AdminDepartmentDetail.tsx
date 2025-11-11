@@ -314,13 +314,6 @@ const AdminDepartmentDetail: React.FC = () => {
     fetchEmployees(1, '');
   };
 
-  // Clear task search
-  const clearTaskSearch = () => {
-    setTaskSearchTerm('');
-    setTaskPage(1);
-    fetchTasks(1, '');
-  };
-  
   // Clear all task filters
   const clearAllTaskFilters = () => {
     setTaskSearchTerm('');
