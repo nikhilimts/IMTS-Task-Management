@@ -8,7 +8,6 @@ import taskService from '../services/taskService';
 import authService from '../services/authService';
 import api from '../services/api';
 import type { CreateTaskData } from '../services/taskService';
-import NotificationBell from '../components/NotificationBell';
 
 interface User {
   _id: string;
@@ -213,7 +212,6 @@ const TaskCreate: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-4 sm:ml-auto">
-              <NotificationBell />
               <button
                 onClick={handleSubmit}
                 disabled={saving}
