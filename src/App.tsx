@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import authService from './services/authService';
+import Layout from './components/Layout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminDashboard from './pages/AdminDashboard';
@@ -52,7 +53,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
     }
   }
 
-  return <>{children}</>;
+  return <Layout>{children}</Layout>;
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
