@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Users, CheckSquare, Clock, TrendingUp, User, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { adminService } from '../services/adminService';
 
@@ -44,10 +44,14 @@ interface DepartmentDetailData {
 const AdminDepartmentDetail: React.FC = () => {
   const { departmentId } = useParams<{ departmentId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [department, setDepartment] = useState<DepartmentDetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'employees' | 'tasks'>('employees');
+  const [activeTab, setActiveTab] = useState<'employees' | 'tasks'>(() => {
+    const tabParam = searchParams.get('tab');
+    return (tabParam === 'tasks' || tabParam === 'employees') ? tabParam : 'employees';
+  });
   
   // Pagination states
   const [employeePage, setEmployeePage] = useState(1);
@@ -71,6 +75,14 @@ const AdminDepartmentDetail: React.FC = () => {
   // Search states
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
   const [taskSearchTerm, setTaskSearchTerm] = useState('');
+  
+  // Task filter states
+  const [taskStatus, setTaskStatus] = useState('');
+  const [taskPriority, setTaskPriority] = useState('');
+  const [taskStartDate, setTaskStartDate] = useState('');
+  const [taskEndDate, setTaskEndDate] = useState('');
+  const [taskSortBy, setTaskSortBy] = useState('createdAt');
+  const [taskSortOrder, setTaskSortOrder] = useState('desc');
   
   const itemsPerPage = 10;
 
@@ -150,11 +162,21 @@ const AdminDepartmentDetail: React.FC = () => {
     
     try {
       setLoadingTasks(true);
-      const response = await adminService.getDepartmentTasks(departmentId, {
+      const params: any = {
         page,
         limit: itemsPerPage,
         search: search || taskSearchTerm
-      });
+      };
+      
+      // Add filters if they are set
+      if (taskStatus) params.status = taskStatus;
+      if (taskPriority) params.priority = taskPriority;
+      if (taskStartDate) params.startDate = taskStartDate;
+      if (taskEndDate) params.endDate = taskEndDate;
+      if (taskSortBy) params.sortBy = taskSortBy;
+      if (taskSortOrder) params.sortOrder = taskSortOrder;
+      
+      const response = await adminService.getDepartmentTasks(departmentId, params);
       
       const tasks = response.data.data.tasks.map((task: any) => ({
         _id: task._id,
@@ -296,11 +318,34 @@ const AdminDepartmentDetail: React.FC = () => {
     fetchEmployees(1, '');
   };
 
-  // Clear task search
-  const clearTaskSearch = () => {
+  // Clear all task filters
+  const clearAllTaskFilters = () => {
     setTaskSearchTerm('');
+    setTaskStatus('');
+    setTaskPriority('');
+    setTaskStartDate('');
+    setTaskEndDate('');
+    setTaskSortBy('createdAt');
+    setTaskSortOrder('desc');
     setTaskPage(1);
     fetchTasks(1, '');
+  };
+  
+  // Apply filters
+  const applyTaskFilters = () => {
+    setTaskPage(1);
+    fetchTasks(1);
+  };
+  
+  // Count active filters
+  const getActiveTaskFilterCount = () => {
+    let count = 0;
+    if (taskStatus) count++;
+    if (taskPriority) count++;
+    if (taskStartDate) count++;
+    if (taskEndDate) count++;
+    if (taskSearchTerm) count++;
+    return count;
   };
 
   // Load initial data when tab changes
@@ -311,11 +356,25 @@ const AdminDepartmentDetail: React.FC = () => {
       fetchTasks(taskPage);
     }
   }, [activeTab, departmentId, employeePage, taskPage]);
+  
+  // Reload tasks when filters change
+  useEffect(() => {
+    if (activeTab === 'tasks' && department) {
+      fetchTasks(taskPage);
+    }
+  }, [taskStatus, taskPriority, taskStartDate, taskEndDate, taskSortBy, taskSortOrder]);
 
   // Load employees immediately after department is loaded (fixes initial load issue)
   useEffect(() => {
     if (department && activeTab === 'employees' && department.employees.length === 0) {
       fetchEmployees(1);
+    }
+  }, [department, activeTab]);
+
+  // Load tasks immediately after department is loaded (fixes initial load issue)
+  useEffect(() => {
+    if (department && activeTab === 'tasks' && department.tasks.length === 0) {
+      fetchTasks(1);
     }
   }, [department, activeTab]);
 
@@ -442,9 +501,7 @@ const AdminDepartmentDetail: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{department.name}</h1>
-              <p className="text-gray-600 mt-1">
-                Head of Department: {department.hod?.name || 'Not assigned'}
-              </p>
+             
             </div>
           </div>
         </div>
@@ -493,6 +550,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   setActiveTab('employees');
                   setSelectedEmployee(null);
                   setEmployeeTasks([]);
+                  // Update URL without causing a navigation
+                  const newSearchParams = new URLSearchParams(searchParams);
+                  newSearchParams.set('tab', 'employees');
+                  window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'employees'
@@ -507,6 +568,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   setActiveTab('tasks');
                   setSelectedEmployee(null);
                   setEmployeeTasks([]);
+                  // Update URL without causing a navigation
+                  const newSearchParams = new URLSearchParams(searchParams);
+                  newSearchParams.set('tab', 'tasks');
+                  window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'tasks'
@@ -840,11 +905,19 @@ const AdminDepartmentDetail: React.FC = () => {
 
             {activeTab === 'tasks' && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Tasks</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Department Tasks</h3>
+                  {getActiveTaskFilterCount() > 0 && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {getActiveTaskFilterCount()} filter{getActiveTaskFilterCount() > 1 ? 's' : ''} active
+                    </span>
+                  )}
+                </div>
                 
-                {/* Task Search */}
-                <div className="mb-6 h-16">
-                  <div className="relative h-10">
+                {/* Task Filters */}
+                <div className="mb-6 space-y-4">
+                  {/* Row 1: Search */}
+                  <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                       <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -854,13 +927,19 @@ const AdminDepartmentDetail: React.FC = () => {
                       type="text"
                       placeholder="Search tasks by title or description..."
                       value={taskSearchTerm}
-                      onChange={(e) => handleTaskSearch(e.target.value)}
+                      onChange={(e) => {
+                        setTaskSearchTerm(e.target.value);
+                        handleTaskSearch(e.target.value);
+                      }}
                       className="block w-full h-10 pl-10 pr-20 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                     />
                     {taskSearchTerm && (
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
                         <button
-                          onClick={clearTaskSearch}
+                          onClick={() => {
+                            setTaskSearchTerm('');
+                            handleTaskSearch('');
+                          }}
                           className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
                         >
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -870,6 +949,109 @@ const AdminDepartmentDetail: React.FC = () => {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Row 2: Status, Priority, Date Range, Sort */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
+                    {/* Status Filter */}
+                    <select
+                      value={taskStatus}
+                      onChange={(e) => {
+                        setTaskStatus(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">All Status</option>
+                      <option value="created">Created</option>
+                      <option value="assigned">Assigned</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="completed">Completed</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    
+                    {/* Priority Filter */}
+                    <select
+                      value={taskPriority}
+                      onChange={(e) => {
+                        setTaskPriority(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">All Priority</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                    
+                    {/* Start Date */}
+                    <input
+                      type="date"
+                      value={taskStartDate}
+                      onChange={(e) => {
+                        setTaskStartDate(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      placeholder="Start Date"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    
+                    {/* End Date */}
+                    <input
+                      type="date"
+                      value={taskEndDate}
+                      onChange={(e) => {
+                        setTaskEndDate(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      placeholder="End Date"
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    
+                    {/* Sort By */}
+                    <select
+                      value={taskSortBy}
+                      onChange={(e) => {
+                        setTaskSortBy(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="createdAt">Created Date</option>
+                      <option value="deadline">Deadline</option>
+                      <option value="priority">Priority</option>
+                      <option value="status">Status</option>
+                      <option value="title">Title</option>
+                    </select>
+                    
+                    {/* Sort Order */}
+                    <select
+                      value={taskSortOrder}
+                      onChange={(e) => {
+                        setTaskSortOrder(e.target.value);
+                        applyTaskFilters();
+                      }}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="desc">Newest First</option>
+                      <option value="asc">Oldest First</option>
+                    </select>
+                  </div>
+                  
+                  {/* Clear Filters Button */}
+                  {getActiveTaskFilterCount() > 0 && (
+                    <div className="flex justify-end">
+                      <button
+                        onClick={clearAllTaskFilters}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {loadingTasks ? (
                   <div className="flex justify-center py-8">

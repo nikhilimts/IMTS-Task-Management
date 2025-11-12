@@ -10,7 +10,10 @@ import {
   BarChart3,
   Home
 } from 'lucide-react';
+import { FaSignOutAlt } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import hodService from '../services/hodService';
+import authService from '../services/authService';
 
 interface DashboardStats {
   totalEmployees: number;
@@ -52,6 +55,21 @@ const HODDashboard: React.FC = () => {
       setError(err.message || 'Failed to fetch dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout API fails, clear local storage and redirect
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('refreshToken');
+      navigate('/login');
     }
   };
 
@@ -166,6 +184,13 @@ const HODDashboard: React.FC = () => {
                 >
                   <TrendingUp className="h-4 w-4" />
                   <span>Refresh</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center space-x-2"
+                >
+                  <FaSignOutAlt className="h-4 w-4" />
+                  <span>Logout</span>
                 </button>
               </div>
             </div>

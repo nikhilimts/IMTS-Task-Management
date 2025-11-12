@@ -5,12 +5,14 @@ import {
   FaBuilding, 
   FaChartBar,
   FaEye,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaSignOutAlt
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { adminService } from '../services/adminService';
 import type { AdminDashboardData } from '../services/adminService';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
 
 const SystemAdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -62,6 +64,21 @@ const SystemAdminDashboard: React.FC = () => {
       case 'Medium': return 'bg-yellow-100 text-yellow-800';
       case 'Low': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout API fails, clear local storage and redirect
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('refreshToken');
+      navigate('/login');
     }
   };
 
@@ -127,6 +144,17 @@ const SystemAdminDashboard: React.FC = () => {
                 >
                   <FaBuilding className="h-4 w-4" />
                   <span>Departments</span>
+                </button>
+              </div>
+              
+              {/* Logout Button */}
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 flex items-center space-x-2 text-sm transition-colors duration-200"
+                >
+                  <FaSignOutAlt className="h-4 w-4" />
+                  <span>Logout</span>
                 </button>
               </div>
             </div>
@@ -236,11 +264,21 @@ const SystemAdminDashboard: React.FC = () => {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div className="text-center">
                           <p className="text-gray-500">Users</p>
-                          <p className="font-semibold text-blue-600">{dept.stats.totalUsers}</p>
+                          <p 
+                            className="font-semibold text-blue-600 cursor-pointer hover:text-blue-800 transition-colors"
+                            onClick={() => navigate(`/admin/departments/${dept.department._id}?tab=employees`)}
+                          >
+                            {dept.stats.totalUsers}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="text-gray-500">Tasks</p>
-                          <p className="font-semibold text-purple-600">{dept.stats.totalTasks}</p>
+                          <p 
+                            className="font-semibold text-purple-600 cursor-pointer hover:text-purple-800 transition-colors"
+                            onClick={() => navigate(`/admin/departments/${dept.department._id}?tab=tasks`)}
+                          >
+                            {dept.stats.totalTasks}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="text-gray-500">Active</p>
