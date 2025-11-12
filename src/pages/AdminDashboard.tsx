@@ -443,8 +443,8 @@ const AdminDashboard: React.FC = () => {
                     >
                       <option value="">All Status</option>
                       <option value="created">Pending</option>
-                      <option value="completed">Completed</option>
-                      <option value="approved">Approved</option>
+                      <option value="completed"> Completed Group Task</option>
+                      <option value="approved">Completed Individual Task</option>
                       
                     </select>
                   </div>
