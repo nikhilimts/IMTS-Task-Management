@@ -135,19 +135,6 @@ const IndividualReport: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const clearFilters = () => {
-    setFilters({
-      status: '',
-      priority: '',
-      stage: '',
-      search: '',
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-      startDate: '',
-      endDate: ''
-    });
-  };
-
   const getStatusBadge = (status: string, stage: string) => {
     if (stage === 'done' && (status === 'approved' || status === 'completed')) {
       return <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completed</span>;

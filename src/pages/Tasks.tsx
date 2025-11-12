@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaPlus, FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import type { Task, TaskFilters } from '../services/taskService';
-import authService from '../services/authService';
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
@@ -124,18 +123,6 @@ const Tasks: React.FC = () => {
     if (rejected > 0) return { status: `${approved}/${total} App., ${rejected} Rej.`, color: 'bg-yellow-100 text-yellow-800' };
     if (approved > 0) return { status: `${approved}/${total} Approved`, color: 'bg-blue-100 text-blue-800' };
     return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
-  };
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      authService.logout();
-      navigate('/login');
-    }
   };
 
   return (
