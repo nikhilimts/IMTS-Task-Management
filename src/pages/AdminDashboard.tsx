@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 import authService from '../services/authService';
 import taskService from '../services/taskService';
 import type { Task as TaskType, TaskFilters } from '../services/taskService';
-import NotificationBell from '../components/NotificationBell';
 import GroupTaskView from '../components/GroupTaskView';
 import OverviewerTasksTable from '../components/OverviewerTasksTable';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -344,7 +343,6 @@ const AdminDashboard: React.FC = () => {
             >
               <FaEye /> <span className="hidden sm:inline">My Report</span><span className="sm:hidden">Report</span>
             </button>
-            <NotificationBell />
             <div className="relative user-dropdown">
               <FaUserCircle 
                 className="text-xl text-gray-600 cursor-pointer hover:text-gray-800" 
