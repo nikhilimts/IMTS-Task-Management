@@ -433,10 +433,9 @@ const IndividualReport: React.FC = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">All Status</option>
-                    <option value="assigned">Assigned</option>
                     <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="approved">Approved</option>
+                    <option value="completed">Completed Group Task</option>
+                    <option value="approved">Completed Individual Task</option>
                   </select>
                 </div>
                 
