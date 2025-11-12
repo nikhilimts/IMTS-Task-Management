@@ -5,7 +5,6 @@ import { FaPlus, FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-i
 import taskService from '../services/taskService';
 import type { Task, TaskFilters } from '../services/taskService';
 import authService from '../services/authService';
-import NotificationBell from '../components/NotificationBell';
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
@@ -141,53 +140,6 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-8">
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors"
-              >
-                Dashboard
-              </button>
-              <span className="text-xl font-medium text-blue-600">Tasks</span>
-              <button 
-                onClick={() => navigate('/report/individual')}
-                className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors"
-              >
-                Reports
-              </button>
-              <span className="text-xl font-medium text-gray-700 hover:text-blue-600 transition-colors cursor-pointer">Settings</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/tasks/new')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-colors"
-              >
-                <FaPlus />
-                <span>Create Task</span>
-              </button>
-              <NotificationBell />
-              <div className="relative group">
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
-                  <FaUser className="text-gray-600" />
-                </div>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="p-6">
         {/* Page Title */}
         <div className="mb-6">
