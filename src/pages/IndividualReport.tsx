@@ -397,69 +397,53 @@ const IndividualReport: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-white p-2 sm:p-4 rounded-lg shadow-md w-full mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2 h-8">
+            <h3 className="text-lg font-medium text-gray-900">Filters & Search</h3>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center text-gray-700 hover:text-gray-900"
+              className="bg-gray-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-gray-700 transition-colors h-8 w-auto whitespace-nowrap"
             >
-              <Filter className="w-5 h-5 mr-2" />
-              Filters & Search
+              <Filter className="w-4 h-4" /> <span>{showFilters ? 'Hide Filters' : 'Show Filters'}</span>
             </button>
           </div>
-          
+
           {showFilters && (
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      value={filters.search}
-                      onChange={(e) => handleFilterChange('search', e.target.value)}
-                      className="pl-10 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                      placeholder="Search tasks..."
-                    />
-                  </div>
-                </div>
-                
+            <div className="mt-4 pt-4 border-t min-h-[200px]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                   <select
-                    value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={filters.status || ''}
+                    onChange={(e) => handleFilterChange('status', e.target.value || '')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   >
                     <option value="">All Status</option>
-                    <option value="in_progress">In Progress</option>
+                    <option value="created">Pending</option>
                     <option value="completed">Completed Group Task</option>
                     <option value="approved">Completed Individual Task</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                   <select
-                    value={filters.priority}
-                    onChange={(e) => handleFilterChange('priority', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={filters.priority || ''}
+                    onChange={(e) => handleFilterChange('priority', e.target.value || '')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   >
-                    <option value="">All Priorities</option>
-                    <option value="urgent">Urgent</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
+                    <option value="">All Priority</option>
                     <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
                   <select
-                    value={filters.stage}
-                    onChange={(e) => handleFilterChange('stage', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    value={filters.stage || ''}
+                    onChange={(e) => handleFilterChange('stage', e.target.value || '')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   >
                     <option value="">All Stages</option>
                     <option value="not_started">Not Started</option>
@@ -469,60 +453,87 @@ const IndividualReport: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={filters.search}
+                      onChange={(e) => handleFilterChange('search', e.target.value)}
+                      className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                      placeholder="Search tasks..."
+                    />
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                   <input
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                   <input
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   />
                 </div>
-                
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
                   <select
-                    value={filters.sortBy}
+                    value={filters.sortBy || 'createdAt'}
                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
                   >
                     <option value="createdAt">Created Date</option>
-                    <option value="deadline">Due Date</option>
+                    <option value="deadline">Deadline</option>
                     <option value="priority">Priority</option>
+                    <option value="status">Status</option>
                     <option value="title">Title</option>
                   </select>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
-                  <select
-                    value={filters.sortOrder}
-                    onChange={(e) => handleFilterChange('sortOrder', e.target.value as 'asc' | 'desc')}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="desc">Newest First</option>
-                    <option value="asc">Oldest First</option>
-                  </select>
-                </div>
               </div>
-              
-              <div className="flex justify-end">
+
+              <div className="mt-4 flex justify-between items-center h-10">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Sort Order:</label>
+                  <button
+                    onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                    className={`px-3 py-1 rounded-md text-sm h-8 whitespace-nowrap ${
+                      filters.sortOrder === 'desc' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {filters.sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+                  </button>
+                </div>
                 <button
-                  onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    setFilters({
+                      status: '',
+                      priority: '',
+                      stage: '',
+                      search: '',
+                      sortBy: 'createdAt',
+                      sortOrder: 'desc',
+                      startDate: '',
+                      endDate: ''
+                    });
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors h-8 flex items-center whitespace-nowrap"
                 >
-                  Clear All Filters
+                  Clear Filters
                 </button>
               </div>
             </div>
