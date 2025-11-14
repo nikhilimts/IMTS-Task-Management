@@ -8,6 +8,7 @@ import {
   FaExclamationTriangle,
   FaSignOutAlt
 } from 'react-icons/fa';
+import { Home } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { adminService } from '../services/adminService';
 import type { AdminDashboardData } from '../services/adminService';
@@ -123,7 +124,14 @@ const SystemAdminDashboard: React.FC = () => {
               <p className="text-gray-600 mb-4">System-wide overview and management</p>
               
               {/* Responsive Grid for Navigation Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-4 mt-4">
+                <button
+                  onClick={() => window.location.href = '/dashboard'}
+                  className="bg-orange-600 text-white px-3 py-2 rounded-md hover:bg-orange-700 flex items-center justify-center space-x-2 text-sm"
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Your Tasks</span>
+                </button>
                 <button
                   onClick={() => navigate('/admin/employees')}
                   className="bg-purple-600 text-white px-3 py-2 rounded-md hover:bg-purple-700 flex items-center justify-center space-x-2 text-sm"
