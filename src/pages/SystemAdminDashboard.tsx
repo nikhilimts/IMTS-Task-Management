@@ -280,10 +280,7 @@ const SystemAdminDashboard: React.FC = () => {
                             {dept.stats.totalTasks}
                           </p>
                         </div>
-                        <div className="text-center">
-                          <p className="text-gray-500">Active</p>
-                          <p className="font-semibold text-orange-600">{dept.stats.activeTasks}</p>
-                        </div>
+                        
                         <div className="text-center">
                           <p className="text-gray-500">Completion</p>
                           <p className="font-semibold text-green-600">{dept.stats.completionRate}%</p>
