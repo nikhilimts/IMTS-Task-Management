@@ -6,7 +6,6 @@ import {
   TrendingUp, 
   AlertTriangle, 
   CheckCircle, 
-  Clock,
   BarChart3,
   Home
 } from 'lucide-react';
