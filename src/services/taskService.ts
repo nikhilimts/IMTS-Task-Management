@@ -157,6 +157,18 @@ export interface TasksResponse {
       completed: number;
       inProgress: number;
       overdue: number;
+      createdByMe?: {
+        total: number;
+        completed: number;
+        inProgress: number;
+        overdue: number;
+      };
+      assignedToMe?: {
+        total: number;
+        completed: number;
+        inProgress: number;
+        overdue: number;
+      };
     };
     pagination: {
       currentPage: number;
