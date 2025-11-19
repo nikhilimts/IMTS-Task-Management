@@ -45,6 +45,18 @@ interface TaskStatistics {
   completed: number;
   inProgress: number;
   overdue: number;
+  createdByMe?: {
+    total: number;
+    completed: number;
+    inProgress: number;
+    overdue: number;
+  };
+  assignedToMe?: {
+    total: number;
+    completed: number;
+    inProgress: number;
+    overdue: number;
+  };
 }
 
 const IndividualReport: React.FC = () => {
@@ -109,23 +121,6 @@ const IndividualReport: React.FC = () => {
     }
   };
 
-  // Load all tasks for export (without pagination)
-  const loadAllTasksForExport = async (): Promise<Task[]> => {
-    try {
-      const response = await taskService.getIndividualReport({
-        limit: 10000, // Large limit to get all tasks
-        ...Object.fromEntries(
-          Object.entries(filters).filter(([_, value]) => value !== '')
-        )
-      });
-      // Sanitize tasks to prevent null reference errors
-      return response.data.tasks.map(sanitizeTask);
-    } catch (error) {
-      console.error('Error loading all tasks:', error);
-      return [];
-    }
-  };
-
   useEffect(() => {
     loadTasks();
   }, [filters]);
@@ -133,19 +128,6 @@ const IndividualReport: React.FC = () => {
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      status: '',
-      priority: '',
-      stage: '',
-      search: '',
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-      startDate: '',
-      endDate: ''
-    });
   };
 
   const getStatusBadge = (status: string, stage: string) => {
@@ -212,46 +194,93 @@ const IndividualReport: React.FC = () => {
         return;
       }
       
-      const allTasks = await loadAllTasksForExport();
+      const response = await taskService.getIndividualReport({
+        limit: 10000,
+        ...Object.fromEntries(
+          Object.entries(filters).filter(([_, value]) => value !== '')
+        )
+      });
+      
+      const allTasks = response.data.tasks.map(sanitizeTask);
+      const stats = response.data.statistics;
       
       if (allTasks.length === 0) {
         toast.warning('No tasks to export');
         return;
       }
 
-      // Prepare data for Excel
-      const excelData = allTasks.map((task, index) => {
-        const userAssignment = task.assignedTo.find(a => a.user._id === currentUser?._id);
-        const isCompleted = task.stage === 'done' && (task.status === 'approved' || task.status === 'completed');
-        const isOverdueTask = isOverdue(task.deadline, task.status, task.stage);
-        
-        return {
-          'S.No': index + 1,
-          'Title': task.title,
-          'Description': task.description,
-          'Type': task.isGroupTask ? 'Group Task' : 'Individual Task',
-          'Priority': task.priority?.toUpperCase(),
-          'Status': isCompleted ? 'Completed' : task.stage === 'done' ? 'Pending Approval' : task.stage === 'pending' ? 'In Progress' : 'Not Started',
-          'Assigned Date': formatDate(userAssignment?.assignedAt || task.createdAt),
-          'Due Date': formatDate(task.deadline),
-          'Created Date': formatDate(task.createdAt),
-          'Completed Date': task.completedAt ? formatDate(task.completedAt) : 'Not Completed',
-          'Creator': task.createdBy?.name || 'Unknown',
-          'Creator Email': task.createdBy?.email || 'Unknown',
-          'Department': task.department?.name || 'Unknown',
-          'Is Overdue': isOverdueTask ? 'Yes' : 'No',
-          'Days Since Assignment': Math.floor((new Date().getTime() - new Date(userAssignment?.assignedAt || task.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
-          'Tags': task.tags?.join(', ') || 'None',
-          'Attachments Count': task.attachments?.length || 0,
-          'Remarks Count': (task.remarks?.creator?.length || 0) + (task.remarks?.assignee?.length || 0) + (task.remarks?.general?.length || 0)
-        };
-      });
+      // Separate tasks into created and assigned
+      const createdTasks = allTasks.filter(task => 
+        task.createdBy?._id === currentUser?._id
+      );
+      const assignedTasks = allTasks.filter(task => 
+        task.assignedTo.some(a => a.user._id === currentUser?._id)
+      );
+
+      // Helper function to prepare task data
+      const prepareTaskData = (tasks: Task[], startIndex: number) => {
+        return tasks.map((task, index) => {
+          const isCompleted = task.stage === 'done' && (task.status === 'approved' || task.status === 'completed');
+          const isOverdueTask = isOverdue(task.deadline, task.status, task.stage);
+          
+          return {
+            'S.No': startIndex + index + 1,
+            'Title': task.title,
+            'Description': task.description,
+            'Type': task.isGroupTask ? 'Group Task' : 'Individual Task',
+            'Priority': task.priority?.toUpperCase(),
+            'Status': isCompleted ? 'Completed' : task.stage === 'done' ? 'Pending Approval' : task.stage === 'pending' ? 'In Progress' : 'Not Started',
+            'Assigned To': task.assignedTo.map(a => a.user.name).join(', ') || 'Not Assigned',
+            'Due Date': formatDate(task.deadline),
+            'Created Date': formatDate(task.createdAt),
+            'Completed Date': task.completedAt ? formatDate(task.completedAt) : 'Not Completed',
+            'Creator': task.createdBy?.name || 'Unknown',
+            'Creator Email': task.createdBy?.email || 'Unknown',
+            'Department': task.department?.name || 'Unknown',
+            'Is Overdue': isOverdueTask ? 'Yes' : 'No',
+            'Days Since Creation': Math.floor((new Date().getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+            'Tags': task.tags?.join(', ') || 'None',
+            'Attachments Count': task.attachments?.length || 0,
+            'Remarks Count': (task.remarks?.creator?.length || 0) + (task.remarks?.assignee?.length || 0) + (task.remarks?.general?.length || 0)
+          };
+        });
+      };
 
       // Create workbook
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
 
-      // Set column widths
+      // Summary Sheet
+      const summaryData = [
+        ['Individual Task Report'],
+        ['User:', currentUser.name],
+        ['Email:', currentUser.email],
+        ['Generated:', new Date().toLocaleString()],
+        [''],
+        ['OVERALL STATISTICS'],
+        ['Total Tasks', stats?.total || 0],
+        ['Completed', stats?.completed || 0],
+        ['In Progress', stats?.inProgress || 0],
+        ['Overdue', stats?.overdue || 0],
+        [''],
+        ['TASKS CREATED BY ME'],
+        ['Total Created', stats?.createdByMe?.total || 0],
+        ['Completed', stats?.createdByMe?.completed || 0],
+        ['In Progress', stats?.createdByMe?.inProgress || 0],
+        ['Overdue', stats?.createdByMe?.overdue || 0],
+        [''],
+        ['TASKS ASSIGNED TO ME'],
+        ['Total Assigned', stats?.assignedToMe?.total || 0],
+        ['Completed', stats?.assignedToMe?.completed || 0],
+        ['In Progress', stats?.assignedToMe?.inProgress || 0],
+        ['Overdue', stats?.assignedToMe?.overdue || 0]
+      ];
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+      wsSummary['!cols'] = [{ wch: 25 }, { wch: 20 }];
+      XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+      // All Tasks Sheet
+      const allTasksData = prepareTaskData(allTasks, 0);
+      const wsAll = XLSX.utils.json_to_sheet(allTasksData);
       const colWidths = [
         { wch: 5 },   // S.No
         { wch: 30 },  // Title
@@ -259,7 +288,7 @@ const IndividualReport: React.FC = () => {
         { wch: 15 },  // Type
         { wch: 10 },  // Priority
         { wch: 15 },  // Status
-        { wch: 15 },  // Assigned Date
+        { wch: 30 },  // Assigned To
         { wch: 15 },  // Due Date
         { wch: 15 },  // Created Date
         { wch: 15 },  // Completed Date
@@ -267,15 +296,29 @@ const IndividualReport: React.FC = () => {
         { wch: 25 },  // Creator Email
         { wch: 20 },  // Department
         { wch: 10 },  // Is Overdue
-        { wch: 15 },  // Days Since Assignment
+        { wch: 15 },  // Days Since Creation
         { wch: 20 },  // Tags
         { wch: 15 },  // Attachments Count
         { wch: 15 }   // Remarks Count
       ];
-      ws['!cols'] = colWidths;
+      wsAll['!cols'] = colWidths;
+      XLSX.utils.book_append_sheet(wb, wsAll, 'All Tasks');
 
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(wb, ws, 'My Tasks Report');
+      // Created By Me Sheet
+      if (createdTasks.length > 0) {
+        const createdTasksData = prepareTaskData(createdTasks, 0);
+        const wsCreated = XLSX.utils.json_to_sheet(createdTasksData);
+        wsCreated['!cols'] = colWidths;
+        XLSX.utils.book_append_sheet(wb, wsCreated, 'Created By Me');
+      }
+
+      // Assigned To Me Sheet
+      if (assignedTasks.length > 0) {
+        const assignedTasksData = prepareTaskData(assignedTasks, 0);
+        const wsAssigned = XLSX.utils.json_to_sheet(assignedTasksData);
+        wsAssigned['!cols'] = colWidths;
+        XLSX.utils.book_append_sheet(wb, wsAssigned, 'Assigned To Me');
+      }
 
       // Generate filename with current date and user name
       const now = new Date();
@@ -348,7 +391,10 @@ const IndividualReport: React.FC = () => {
         {/* User Info */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Report for: {currentUser.name}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          
+          {/* Overall Statistics */}
+          <h3 className="text-md font-medium text-gray-700 mb-3">Overall Statistics</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -394,6 +440,112 @@ const IndividualReport: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Created By Me Statistics */}
+          {taskStats.createdByMe && (
+            <>
+              <h3 className="text-md font-medium text-gray-700 mb-3 mt-6">Tasks Created By Me</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <User className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-purple-900">Total Created</p>
+                      <p className="text-2xl font-bold text-purple-600">{taskStats.createdByMe.total}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">Completed</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.createdByMe.completed}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <Clock className="w-6 h-6 text-yellow-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">In Progress</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.createdByMe.inProgress}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">Overdue</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.createdByMe.overdue}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Assigned To Me Statistics */}
+          {taskStats.assignedToMe && (
+            <>
+              <h3 className="text-md font-medium text-gray-700 mb-3 mt-6">Tasks Assigned To Me</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-indigo-50 p-4 rounded-lg border-2 border-indigo-200">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <User className="w-8 h-8 text-indigo-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-indigo-900">Total Assigned</p>
+                      <p className="text-2xl font-bold text-indigo-600">{taskStats.assignedToMe.total}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-indigo-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">Completed</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.assignedToMe.completed}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-indigo-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <Clock className="w-6 h-6 text-yellow-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">In Progress</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.assignedToMe.inProgress}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-indigo-50 p-4 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-700">Overdue</p>
+                      <p className="text-xl font-bold text-gray-900">{taskStats.assignedToMe.overdue}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Filters */}

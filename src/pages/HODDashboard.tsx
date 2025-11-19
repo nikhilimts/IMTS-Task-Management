@@ -6,7 +6,6 @@ import {
   TrendingUp, 
   AlertTriangle, 
   CheckCircle, 
-  Clock,
   BarChart3,
   Home
 } from 'lucide-react';
@@ -124,28 +123,12 @@ const HODDashboard: React.FC = () => {
       textColor: 'text-purple-600'
     },
     {
-      title: 'Active Tasks',
-      value: stats.activeTasks,
-      icon: Clock,
-      color: 'bg-yellow-500',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-600'
-    },
-    {
       title: 'Completed Tasks',
       value: stats.completedTasks,
       icon: CheckCircle,
       color: 'bg-green-500',
       bgColor: 'bg-green-50',
       textColor: 'text-green-600'
-    },
-    {
-      title: 'Overdue Tasks',
-      value: stats.overdueTasks,
-      icon: AlertTriangle,
-      color: 'bg-red-500',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600'
     },
     {
       title: 'Completion Rate',
@@ -216,7 +199,7 @@ const HODDashboard: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-4 gap-6 mb-8">
           {statCards.map((stat, index) => {
             const IconComponent = stat.icon;
             return (

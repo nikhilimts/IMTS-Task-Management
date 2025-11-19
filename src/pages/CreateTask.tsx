@@ -117,6 +117,16 @@ const CreateTask: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+    
+    // Check file sizes
+    const oversizedFiles = files.filter(file => file.size > maxFileSize);
+    if (oversizedFiles.length > 0) {
+      toast.error(`File size limit exceeded. Maximum allowed size is 10MB. Files: ${oversizedFiles.map(f => f.name).join(', ')}`);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       attachments: [...prev.attachments, ...files],
@@ -486,6 +496,7 @@ const CreateTask: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   <p className="text-lg text-black">Drop here files or browse files</p>
+                  <p className="text-sm text-gray-500 mt-1">Max file size: 10MB per file</p>
                 </div>
                 <input
                   type="file"

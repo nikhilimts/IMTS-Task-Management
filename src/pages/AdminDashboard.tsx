@@ -65,11 +65,7 @@ const AdminDashboard: React.FC = () => {
       const userData = authService.getCurrentUser();
       setCurrentUser(userData);
       
-      // Redirect admin users to system admin dashboard
-      if (userData && userData.role === 'admin') {
-        navigate('/admin/dashboard');
-        return;
-      }
+      // Allow all users including admins to access their personal dashboard
     } catch (error) {
       console.error('Failed to load current user:', error);
     }
@@ -331,6 +327,14 @@ const AdminDashboard: React.FC = () => {
                 className="bg-orange-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-orange-700 transition-colors"
               >
                 <FaHome /> <span className="hidden sm:inline">Back to HOD Dashboard</span><span className="sm:hidden">HOD Dashboard</span>
+              </button>
+            )}
+            {currentUser?.role === 'admin' && (
+              <button 
+                onClick={() => navigate('/admin/dashboard')}
+                className="bg-purple-600 text-white px-3 py-2 rounded-md flex items-center space-x-2 text-sm hover:bg-purple-700 transition-colors"
+              >
+                <FaUsers /> <span className="hidden sm:inline">Admin Dashboard</span><span className="sm:hidden">Admin</span>
               </button>
             )}
             <button 

@@ -1,6 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaBell, FaCircle, FaCheckDouble, FaTimes } from 'react-icons/fa';
 
+// Add scrollbar styles
+const scrollbarStyle = `
+  .notification-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  .notification-container::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+  .notification-container::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
+  }
+  .notification-container::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+`;
+
 // Type Definitions
 type Notification = {
   _id: string;
@@ -347,7 +365,11 @@ const NotificationBell = () => {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-80 overflow-y-auto">
+          <div className="h-80 overflow-y-scroll pb-4 notification-container" style={{
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#9ca3af #f3f4f6'
+          }}>
+            <style dangerouslySetInnerHTML={{ __html: scrollbarStyle }} />
             {loading && notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">Loading notifications...</div>
             ) : error ? (
@@ -357,7 +379,7 @@ const NotificationBell = () => {
                 {showUnreadOnly ? 'No unread notifications' : 'No notifications'}
               </div>
             ) : (
-              <>
+              <div className="space-y-0 pb-6">
                 {filtered.map((n) => (
                   <div key={n._id} onClick={() => handleNotificationClick(n)} className={getNotificationStyles(n)}>
                     <div className="flex items-start gap-3">
@@ -403,7 +425,7 @@ const NotificationBell = () => {
                     </button>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>

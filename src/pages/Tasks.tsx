@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaPlus, FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-icons/fa';
+import { FaEye, FaEdit, FaTrash, FaUser, FaClock, FaFlag } from 'react-icons/fa';
 import taskService from '../services/taskService';
 import type { Task, TaskFilters } from '../services/taskService';
-import authService from '../services/authService';
 
 const Tasks: React.FC = () => {
   const navigate = useNavigate();
@@ -126,24 +125,12 @@ const Tasks: React.FC = () => {
     return { status: 'Pending', color: 'bg-gray-100 text-gray-800' };
   };
 
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      authService.logout();
-      navigate('/login');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Task Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Task Management''''</h1>
           <p className="text-gray-600">Manage and track all tasks efficiently</p>
         </div>
 

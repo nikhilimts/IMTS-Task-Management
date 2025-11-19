@@ -146,6 +146,16 @@ const TaskDetail: React.FC = () => {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    const maxFileSize = 10 * 1024 * 1024; // 10MB in bytes
+    
+    // Check file sizes
+    const oversizedFiles = files.filter(file => file.size > maxFileSize);
+    if (oversizedFiles.length > 0) {
+      toast.error(`File size limit exceeded. Maximum allowed size is 10MB. Files: ${oversizedFiles.map(f => f.name).join(', ')}`);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+    
     setSelectedFiles(files);
     setFormData(prev => ({ ...prev, attachments: files }));
   };
@@ -675,13 +685,16 @@ const TaskDetail: React.FC = () => {
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
                 />
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <FaFileUpload className="mr-2" />
-                    Choose Files
-                  </label>
+                  <div>
+                    <label
+                      htmlFor="file-upload"
+                      className="cursor-pointer px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 inline-flex items-center"
+                    >
+                      <FaFileUpload className="mr-2" />
+                      Choose Files
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">Max file size: 10MB per file</p>
+                  </div>
                   {selectedFiles.length > 0 && (
                     <button
                       onClick={handleFileUpload}
