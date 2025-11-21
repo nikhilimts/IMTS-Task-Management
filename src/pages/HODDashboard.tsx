@@ -146,7 +146,10 @@ const HODDashboard: React.FC = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <div className="flex items-center justify-between">
+            <div className="          flex flex-col sm:flex-row     /* 🔥 Responsive layout */
+          items-start sm:items-center
+          justify-between
+          space-y-4 sm:space-y-0         ">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">HOD Dashboard</h1>
                 <p className="mt-1 text-sm text-gray-500">
@@ -196,7 +199,7 @@ const HODDashboard: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
           {statCards.map((stat, index) => {
             const IconComponent = stat.icon;
             return (

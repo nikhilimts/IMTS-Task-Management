@@ -52,7 +52,7 @@ const AdminDepartmentDetail: React.FC = () => {
     const tabParam = searchParams.get('tab');
     return (tabParam === 'tasks' || tabParam === 'employees') ? tabParam : 'employees';
   });
-  
+
   // Pagination states
   const [employeePage, setEmployeePage] = useState(1);
   const [taskPage, setTaskPage] = useState(1);
@@ -60,22 +60,22 @@ const AdminDepartmentDetail: React.FC = () => {
   const [taskPagination, setTaskPagination] = useState<any>(null);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(false);
-  
+
   // Employee task view states
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [employeeTasks, setEmployeeTasks] = useState<any[]>([]);
   const [loadingEmployeeTasks, setLoadingEmployeeTasks] = useState(false);
   const [employeeTaskPagination, setEmployeeTaskPagination] = useState<any>(null);
   const [employeeTaskPage, setEmployeeTaskPage] = useState(1);
-  
+
   // Employee statistics
   const [employeeStats, setEmployeeStats] = useState<any>(null);
   const [loadingEmployeeStats, setLoadingEmployeeStats] = useState(false);
-  
+
   // Search states
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
   const [taskSearchTerm, setTaskSearchTerm] = useState('');
-  
+
   // Task filter states
   const [taskStatus, setTaskStatus] = useState('');
   const [taskPriority, setTaskPriority] = useState('');
@@ -83,17 +83,17 @@ const AdminDepartmentDetail: React.FC = () => {
   const [taskEndDate, setTaskEndDate] = useState('');
   const [taskSortBy, setTaskSortBy] = useState('createdAt');
   const [taskSortOrder, setTaskSortOrder] = useState('desc');
-  
+
   const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchDepartmentDetail = async () => {
       if (!departmentId) return;
-      
+
       try {
         setLoading(true);
         const response = await adminService.getDepartmentDetail(departmentId);
-        
+
         // Transform the backend response to match our interface
         const backendData = response.data.data;
         const transformedData: DepartmentDetailData = {
@@ -110,12 +110,12 @@ const AdminDepartmentDetail: React.FC = () => {
             inProgressTasks: backendData.stats.activeTasks
           }
         };
-        
+
         setDepartment(transformedData);
-        
+
         // Initially set empty data, we'll load separately with pagination
         setDepartment(transformedData);
-        
+
       } catch (err) {
         setError('Failed to fetch department details');
         console.error('Error fetching department detail:', err);
@@ -130,7 +130,7 @@ const AdminDepartmentDetail: React.FC = () => {
   // Fetch employees with pagination
   const fetchEmployees = async (page: number = 1, search: string = '') => {
     if (!departmentId) return;
-    
+
     try {
       setLoadingEmployees(true);
       const response = await adminService.getDepartmentEmployees(departmentId, {
@@ -138,7 +138,7 @@ const AdminDepartmentDetail: React.FC = () => {
         limit: itemsPerPage,
         search: search || employeeSearchTerm
       });
-      
+
       const employees = response.data.data.employees.map((emp: any) => ({
         _id: emp._id,
         name: emp.name,
@@ -146,7 +146,7 @@ const AdminDepartmentDetail: React.FC = () => {
         role: emp.role,
         createdAt: emp.createdAt
       }));
-      
+
       setDepartment(prev => prev ? { ...prev, employees } : null);
       setEmployeePagination(response.data.data.pagination);
     } catch (err) {
@@ -159,7 +159,7 @@ const AdminDepartmentDetail: React.FC = () => {
   // Fetch tasks with pagination
   const fetchTasks = async (page: number = 1, search: string = '') => {
     if (!departmentId) return;
-    
+
     try {
       setLoadingTasks(true);
       const params: any = {
@@ -167,7 +167,7 @@ const AdminDepartmentDetail: React.FC = () => {
         limit: itemsPerPage,
         search: search || taskSearchTerm
       };
-      
+
       // Add filters if they are set
       if (taskStatus) params.status = taskStatus;
       if (taskPriority) params.priority = taskPriority;
@@ -175,9 +175,9 @@ const AdminDepartmentDetail: React.FC = () => {
       if (taskEndDate) params.endDate = taskEndDate;
       if (taskSortBy) params.sortBy = taskSortBy;
       if (taskSortOrder) params.sortOrder = taskSortOrder;
-      
+
       const response = await adminService.getDepartmentTasks(departmentId, params);
-      
+
       const tasks = response.data.data.tasks.map((task: any) => ({
         _id: task._id,
         title: task.title,
@@ -189,7 +189,7 @@ const AdminDepartmentDetail: React.FC = () => {
         createdAt: task.createdAt,
         dueDate: task.deadline
       }));
-      
+
       setDepartment(prev => prev ? { ...prev, tasks } : null);
       setTaskPagination(response.data.data.pagination);
     } catch (err) {
@@ -211,14 +211,14 @@ const AdminDepartmentDetail: React.FC = () => {
       const now = new Date();
       return dueDate < now && !['completed', 'approved'].includes(task.status);
     }).length;
-    
+
     const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(1) : '0.0';
-    
+
     // Priority breakdown
     const highPriorityTasks = tasks.filter(task => task.priority === 'high' || task.priority === 'urgent').length;
     const mediumPriorityTasks = tasks.filter(task => task.priority === 'medium').length;
     const lowPriorityTasks = tasks.filter(task => task.priority === 'low').length;
-    
+
     return {
       totalTasks,
       completedTasks,
@@ -236,25 +236,25 @@ const AdminDepartmentDetail: React.FC = () => {
   // Fetch tasks for a specific employee
   const fetchEmployeeTasks = async (employeeId: string, page: number = 1) => {
     if (!departmentId) return;
-    
+
     try {
       setLoadingEmployeeTasks(true);
       setLoadingEmployeeStats(true);
-      
+
       // Fetch paginated tasks for display
       const response = await adminService.getDepartmentTasks(departmentId, {
         page,
         limit: itemsPerPage,
         assignedTo: employeeId
       });
-      
+
       // Fetch all tasks for statistics (without pagination)
       const allTasksResponse = await adminService.getDepartmentTasks(departmentId, {
         page: 1,
         limit: 1000, // Large limit to get all tasks
         assignedTo: employeeId
       });
-      
+
       const tasks = response.data.data.tasks.map((task: any) => ({
         _id: task._id,
         title: task.title,
@@ -266,7 +266,7 @@ const AdminDepartmentDetail: React.FC = () => {
         createdAt: task.createdAt,
         dueDate: task.deadline
       }));
-      
+
       const allTasks = allTasksResponse.data.data.tasks.map((task: any) => ({
         _id: task._id,
         title: task.title,
@@ -278,7 +278,7 @@ const AdminDepartmentDetail: React.FC = () => {
         createdAt: task.createdAt,
         dueDate: task.deadline
       }));
-      
+
       setEmployeeTasks(tasks);
       setEmployeeTaskPagination(response.data.data.pagination);
       setEmployeeStats(calculateEmployeeStats(allTasks));
@@ -330,13 +330,13 @@ const AdminDepartmentDetail: React.FC = () => {
     setTaskPage(1);
     fetchTasks(1, '');
   };
-  
+
   // Apply filters
   const applyTaskFilters = () => {
     setTaskPage(1);
     fetchTasks(1);
   };
-  
+
   // Count active filters
   const getActiveTaskFilterCount = () => {
     let count = 0;
@@ -356,7 +356,7 @@ const AdminDepartmentDetail: React.FC = () => {
       fetchTasks(taskPage);
     }
   }, [activeTab, departmentId, employeePage, taskPage]);
-  
+
   // Reload tasks when filters change
   useEffect(() => {
     if (activeTab === 'tasks' && department) {
@@ -501,7 +501,7 @@ const AdminDepartmentDetail: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{department.name}</h1>
-             
+
             </div>
           </div>
         </div>
@@ -512,8 +512,8 @@ const AdminDepartmentDetail: React.FC = () => {
             <div className="flex items-center">
               <Users className="w-8 h-8 text-blue-600" />
               <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">Total Employees</p>
-          <p className="text-2xl font-bold text-gray-900">{department.statistics.totalEmployees}</p>
+                <p className="text-sm font-medium text-gray-600">Total Employees</p>
+                <p className="text-2xl font-bold text-gray-900">{department.statistics.totalEmployees}</p>
               </div>
             </div>
           </div>
@@ -522,8 +522,8 @@ const AdminDepartmentDetail: React.FC = () => {
             <div className="flex items-center">
               <CheckSquare className="w-8 h-8 text-green-600" />
               <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-          <p className="text-2xl font-bold text-gray-900">{department.statistics.totalTasks}</p>
+                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                <p className="text-2xl font-bold text-gray-900">{department.statistics.totalTasks}</p>
               </div>
             </div>
           </div>
@@ -532,13 +532,13 @@ const AdminDepartmentDetail: React.FC = () => {
             <div className="flex items-center">
               <TrendingUp className="w-8 h-8 text-green-600" />
               <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">Completed Tasks</p>
-          <p className="text-2xl font-bold text-green-600">{department.statistics.completedTasks}</p>
+                <p className="text-sm font-medium text-gray-600">Completed Tasks</p>
+                <p className="text-2xl font-bold text-green-600">{department.statistics.completedTasks}</p>
               </div>
             </div>
           </div>
 
-          
+
         </div>
 
         {/* Tabs */}
@@ -555,11 +555,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   newSearchParams.set('tab', 'employees');
                   window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'employees'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'employees'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Employees ({department.statistics.totalEmployees})
               </button>
@@ -573,11 +572,10 @@ const AdminDepartmentDetail: React.FC = () => {
                   newSearchParams.set('tab', 'tasks');
                   window.history.replaceState(null, '', `?${newSearchParams.toString()}`);
                 }}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'tasks'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'tasks'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 Tasks ({department.statistics.totalTasks})
               </button>
@@ -591,7 +589,7 @@ const AdminDepartmentDetail: React.FC = () => {
                 {!selectedEmployee ? (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Department Employees</h3>
-                    
+
                     {/* Employee Search */}
                     <div className="mb-6 h-16">
                       <div className="relative h-10">
@@ -621,7 +619,7 @@ const AdminDepartmentDetail: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <p className="text-sm text-gray-600 mb-4">Click on an employee to view their tasks</p>
                     {loadingEmployees ? (
                       <div className="flex justify-center py-8">
@@ -635,7 +633,7 @@ const AdminDepartmentDetail: React.FC = () => {
                             onClick={() => handleEmployeeClick(employee)}
                             className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:bg-gray-50 transition-all cursor-pointer"
                           >
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                               <div className="flex items-center space-x-4">
                                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                   <User className="w-6 h-6 text-blue-600" />
@@ -655,12 +653,13 @@ const AdminDepartmentDetail: React.FC = () => {
                                   </div>
                                 </div>
                               </div>
-                              <div className="text-blue-600">
+                              <div className="text-blue-600 sm:text-right">
                                 <span className="text-sm font-medium">View Tasks →</span>
                               </div>
                             </div>
                           </div>
                         ))}
+
                         <PaginationComponent
                           pagination={employeePagination}
                           currentPage={employeePage}
@@ -670,6 +669,7 @@ const AdminDepartmentDetail: React.FC = () => {
                           }}
                         />
                       </div>
+
                     ) : (
                       <div className="text-center py-8">
                         <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -680,25 +680,26 @@ const AdminDepartmentDetail: React.FC = () => {
                 ) : (
                   /* Selected Employee Tasks View */
                   <div>
-                    <div className="flex items-center space-x-4 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                       <button
                         onClick={() => {
                           setSelectedEmployee(null);
                           setEmployeeTasks([]);
                         }}
-                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
                       >
                         <ArrowLeft className="w-4 h-4" />
-                        <span>Back to Employees</span>
+                        <span className="hidden sm:inline">Back to Employees</span>
+                        <span className="sm:hidden">Back</span>
                       </button>
-                      <div className="h-6 w-px bg-gray-300" />
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-blue-600" />
+                      <div className="hidden sm:block h-6 w-px bg-gray-300" />
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{selectedEmployee.name}</h3>
-                          <p className="text-sm text-gray-600">{selectedEmployee.email}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{selectedEmployee.name}</h3>
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">{selectedEmployee.email}</p>
                         </div>
                       </div>
                     </div>
@@ -717,40 +718,40 @@ const AdminDepartmentDetail: React.FC = () => {
                     ) : employeeStats && (
                       <div className="mb-6">
                         <h4 className="text-md font-medium text-gray-900 mb-4">Performance Report</h4>
-                        
+
                         {/* Main Statistics Cards */}
                         <div className="flex flex-wrap justify-center gap-4 mb-4">
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-                          <div className="flex items-center">
-                            <CheckSquare className="w-6 h-6 text-blue-600" />
-                            <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                            <p className="text-2xl font-bold text-gray-900">{employeeStats.totalTasks}</p>
+                            <div className="flex items-center">
+                              <CheckSquare className="w-6 h-6 text-blue-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                                <p className="text-2xl font-bold text-gray-900">{employeeStats.totalTasks}</p>
+                              </div>
                             </div>
-                          </div>
                           </div>
 
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                          <div className="flex items-center">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
-                            <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-600">Completed</p>
-                            <p className="text-2xl font-bold text-green-600">{employeeStats.completedTasks}</p>
-                            <p className="text-xs text-gray-500">{employeeStats.completionRate}% completion rate</p>
+                            <div className="flex items-center">
+                              <TrendingUp className="w-6 h-6 text-green-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Completed</p>
+                                <p className="text-2xl font-bold text-green-600">{employeeStats.completedTasks}</p>
+                                <p className="text-xs text-gray-500">{employeeStats.completionRate}% completion rate</p>
+                              </div>
                             </div>
                           </div>
-                          </div>
 
-                          
+
 
                           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-                          <div className="flex items-center">
-                            <Calendar className="w-6 h-6 text-red-600" />
-                            <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-600">Overdue</p>
-                            <p className="text-2xl font-bold text-red-600">{employeeStats.overdueTasks}</p>
+                            <div className="flex items-center">
+                              <Calendar className="w-6 h-6 text-red-600" />
+                              <div className="ml-3">
+                                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                                <p className="text-2xl font-bold text-red-600">{employeeStats.overdueTasks}</p>
+                              </div>
                             </div>
-                          </div>
                           </div>
                         </div>
 
@@ -764,12 +765,12 @@ const AdminDepartmentDetail: React.FC = () => {
                                 <span className="text-sm text-gray-600">Pending</span>
                                 <span className="text-sm font-medium text-yellow-600">{employeeStats.pendingTasks}</span>
                               </div>
-                              
+
                               <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Completed</span>
                                 <span className="text-sm font-medium text-green-600">{employeeStats.completedTasks}</span>
                               </div>
-                              
+
                             </div>
                           </div>
 
@@ -798,31 +799,28 @@ const AdminDepartmentDetail: React.FC = () => {
                           <h5 className="text-sm font-semibold text-gray-700 mb-3">Performance Indicators</h5>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="text-center">
-                              <div className={`text-2xl font-bold ${
-                                parseFloat(employeeStats.completionRate) >= 80 ? 'text-green-600' :
+                              <div className={`text-2xl font-bold ${parseFloat(employeeStats.completionRate) >= 80 ? 'text-green-600' :
                                 parseFloat(employeeStats.completionRate) >= 60 ? 'text-yellow-600' :
-                                'text-red-600'
-                              }`}>
+                                  'text-red-600'
+                                }`}>
                                 {employeeStats.completionRate}%
                               </div>
                               <div className="text-xs text-gray-500">Completion Rate</div>
                             </div>
                             <div className="text-center">
-                              <div className={`text-2xl font-bold ${
-                                employeeStats.overdueTasks === 0 ? 'text-green-600' :
+                              <div className={`text-2xl font-bold ${employeeStats.overdueTasks === 0 ? 'text-green-600' :
                                 employeeStats.overdueTasks <= 2 ? 'text-yellow-600' :
-                                'text-red-600'
-                              }`}>
+                                  'text-red-600'
+                                }`}>
                                 {employeeStats.overdueTasks}
                               </div>
                               <div className="text-xs text-gray-500">Overdue Tasks</div>
                             </div>
                             <div className="text-center">
-                              <div className={`text-2xl font-bold ${
-                                employeeStats.totalTasks >= 10 ? 'text-blue-600' :
+                              <div className={`text-2xl font-bold ${employeeStats.totalTasks >= 10 ? 'text-blue-600' :
                                 employeeStats.totalTasks >= 5 ? 'text-yellow-600' :
-                                'text-gray-600'
-                              }`}>
+                                  'text-gray-600'
+                                }`}>
                                 {employeeStats.totalTasks}
                               </div>
                               <div className="text-xs text-gray-500">Tasks Assigned</div>
@@ -833,7 +831,7 @@ const AdminDepartmentDetail: React.FC = () => {
                     )}
 
                     <h4 className="text-md font-medium text-gray-900 mb-4">Tasks Assigned to {selectedEmployee.name}</h4>
-                    
+
                     {loadingEmployeeTasks ? (
                       <div className="flex justify-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -843,13 +841,13 @@ const AdminDepartmentDetail: React.FC = () => {
                         {employeeTasks.map((task) => (
                           <div
                             key={task._id}
-                            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer hover:bg-gray-50"
+                            className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer hover:bg-gray-50"
                             onClick={() => handleTaskClick(task)}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <h4 className="text-lg font-medium text-gray-900 hover:text-blue-600">
+                            <div className="flex flex-col gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                  <h4 className="text-base sm:text-lg font-medium text-gray-900 hover:text-blue-600 break-words">
                                     {task.title}
                                   </h4>
                                   {task.isGroupTask && (
@@ -865,20 +863,20 @@ const AdminDepartmentDetail: React.FC = () => {
                                     {task.priority} priority
                                   </span>
                                 </div>
-                                <p className="text-gray-600 mb-2 line-clamp-2">{task.description}</p>
-                                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                <p className="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{task.description}</p>
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                                   <span className="flex items-center">
-                                    <Calendar className="w-4 h-4 mr-1" />
-                                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                    <span className="hidden sm:inline">Due:</span> {new Date(task.dueDate).toLocaleDateString()}
                                   </span>
                                   <span className="flex items-center">
-                                    <Clock className="w-4 h-4 mr-1" />
-                                    Created: {new Date(task.createdAt).toLocaleDateString()}
+                                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                    <span className="hidden sm:inline">Created:</span> {new Date(task.createdAt).toLocaleDateString()}
                                   </span>
                                 </div>
                               </div>
-                              <div className="ml-4 text-blue-600">
-                                <span className="text-sm font-medium">View Details →</span>
+                              <div className="text-blue-600 flex-shrink-0">
+                                <span className="text-xs sm:text-sm font-medium whitespace-nowrap">View Details →</span>
                               </div>
                             </div>
                           </div>
@@ -913,7 +911,7 @@ const AdminDepartmentDetail: React.FC = () => {
                     </span>
                   )}
                 </div>
-                
+
                 {/* Task Filters */}
                 <div className="mb-6 space-y-4">
                   {/* Row 1: Search */}
@@ -949,7 +947,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Row 2: Status, Priority, Date Range, Sort */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
                     {/* Status Filter */}
@@ -970,7 +968,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       <option value="completed">Completed</option>
                       <option value="rejected">Rejected</option>
                     </select>
-                    
+
                     {/* Priority Filter */}
                     <select
                       value={taskPriority}
@@ -986,7 +984,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       <option value="high">High</option>
                       <option value="urgent">Urgent</option>
                     </select>
-                    
+
                     {/* Start Date */}
                     <input
                       type="date"
@@ -998,7 +996,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       placeholder="Start Date"
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                    
+
                     {/* End Date */}
                     <input
                       type="date"
@@ -1010,7 +1008,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       placeholder="End Date"
                       className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                    
+
                     {/* Sort By */}
                     <select
                       value={taskSortBy}
@@ -1026,7 +1024,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       <option value="status">Status</option>
                       <option value="title">Title</option>
                     </select>
-                    
+
                     {/* Sort Order */}
                     <select
                       value={taskSortOrder}
@@ -1040,7 +1038,7 @@ const AdminDepartmentDetail: React.FC = () => {
                       <option value="asc">Oldest First</option>
                     </select>
                   </div>
-                  
+
                   {/* Clear Filters Button */}
                   {getActiveTaskFilterCount() > 0 && (
                     <div className="flex justify-end">
