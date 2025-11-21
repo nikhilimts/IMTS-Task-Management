@@ -7,7 +7,8 @@ import {
   AlertTriangle, 
   CheckCircle, 
   BarChart3,
-  Home
+  Home,
+  Plus
 } from 'lucide-react';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -157,6 +158,13 @@ const HODDashboard: React.FC = () => {
                 </p>
               </div>
               <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => navigate('/tasks/new')}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Task</span>
+                </button>
                 <button
                   onClick={() => navigate('/dashboard')}
                   className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center space-x-2"
