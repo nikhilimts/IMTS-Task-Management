@@ -8,7 +8,7 @@ import {
   FaExclamationTriangle,
   FaSignOutAlt
 } from 'react-icons/fa';
-import { Home } from 'lucide-react';
+import { Home, Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { adminService } from '../services/adminService';
 import type { AdminDashboardData } from '../services/adminService';
@@ -123,7 +123,14 @@ const SystemAdminDashboard: React.FC = () => {
               <p className="text-gray-600 mb-4">System-wide overview and management</p>
               
               {/* Responsive Grid for Navigation Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 sm:gap-4 mt-4">
+                <button
+                  onClick={() => navigate('/tasks/new')}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Create Task</span>
+                </button>
                 <button
                   onClick={() => window.location.href = '/dashboard'}
                   className="bg-orange-600 text-white px-3 py-2 rounded-md hover:bg-orange-700 flex items-center justify-center space-x-2 text-sm"
@@ -147,7 +154,7 @@ const SystemAdminDashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={() => navigate('/admin/departments')}
-                  className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 flex items-center justify-center space-x-2 text-sm"
+                  className="bg-teal-600 text-white px-3 py-2 rounded-md hover:bg-teal-700 flex items-center justify-center space-x-2 text-sm"
                 >
                   <FaBuilding className="h-4 w-4" />
                   <span>Departments</span>

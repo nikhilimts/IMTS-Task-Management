@@ -349,6 +349,7 @@ const AdminDashboard: React.FC = () => {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
               />
               {userDropdownOpen && (
+                
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
                   <div className="py-1">
                     <button
