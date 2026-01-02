@@ -35,7 +35,6 @@ export interface AuthResponse {
   data: {
     user: User;
     token: string;
-    refreshToken?: string;
   };
 }
 
@@ -53,10 +52,6 @@ class AuthService {
       // Store auth data in localStorage
       localStorage.setItem('authToken', response.data.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.data.user));
-      
-      if (response.data.data.refreshToken) {
-        localStorage.setItem('refreshToken', response.data.data.refreshToken);
-      }
     }
     
     return response.data;
@@ -69,10 +64,6 @@ class AuthService {
       // Store auth data in localStorage
       localStorage.setItem('authToken', response.data.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.data.user));
-      
-      if (response.data.data.refreshToken) {
-        localStorage.setItem('refreshToken', response.data.data.refreshToken);
-      }
     }
     
     return response.data;
@@ -88,7 +79,6 @@ class AuthService {
       // Clear local storage
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      localStorage.removeItem('refreshToken');
     }
   }
 

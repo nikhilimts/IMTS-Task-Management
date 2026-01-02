@@ -78,7 +78,6 @@ const SystemAdminDashboard: React.FC = () => {
       // Even if logout API fails, clear local storage and redirect
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      localStorage.removeItem('refreshToken');
       navigate('/login');
     }
   };

@@ -33,7 +33,6 @@ api.interceptors.response.use(
       // Token expired or invalid
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      localStorage.removeItem('refreshToken');
       
       // Only redirect if we're not already on a public route
       const currentPath = window.location.pathname;
